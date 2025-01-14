@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Application\UseCases.csproj" />
+    <ProjectReference Include="..\UseCases\UseCases.csproj" />
     <ProjectReference Include="..\Gateways\Gateways.csproj" />
   </ItemGroup>
 

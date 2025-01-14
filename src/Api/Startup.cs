@@ -1,6 +1,9 @@
 ﻿using Api.Configuration;
+using Controllers.DependencyInjection;
 using Core.WebApi.Configurations;
 using Core.WebApi.DependencyInjection;
+using Gateways.Cognito.DependencyInjection;
+using Gateways.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Api
@@ -37,16 +40,14 @@ namespace Api
 
             services.AddHealthCheckConfig();
 
-            //services.AddControllerDependencyServices();
+            services.AddControllerDependencyServices();
 
             //var sqsQueues = new Queues
             //{
-            //    QueueProdutoCriadoEvent = settings.AwsSqsSettings.QueueProdutoCriadoEvent,
-            //    QueueProdutoAtualizadoEvent = settings.AwsSqsSettings.QueueProdutoAtualizadoEvent,
-            //    QueueProdutoExcluidoEvent = settings.AwsSqsSettings.QueueProdutoExcluidoEvent
+            //    QueueConversaoCriadaEvent = settings.AwsSqsSettings.QueueConversaoCriadaEvent
             //};
 
-            //services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, queues);
+            //services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, sqsQueues);
 
             //services.AddGatewayCognitoDependencyServices(settings.CognitoSettings.ClientId, settings.CognitoSettings.ClientSecret, settings.CognitoSettings.UserPoolId);
         }

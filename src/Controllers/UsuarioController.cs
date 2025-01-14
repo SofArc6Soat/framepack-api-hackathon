@@ -1,18 +1,22 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Entities;
+using Domain.ValueObjects;
 using Gateways.Cognito.Dtos.Request;
 using Gateways.Cognito.Dtos.Response;
-using Gateways.Dtos.Request;
 using UseCases;
 
 namespace Controllers
 {
     public class UsuarioController(IUsuarioUseCase usuarioUseCase) : IUsuarioController
     {
-        public async Task<TokenUsuario?> IdentificarClienteCpfAsync(ClienteIdentifiqueSeRequestDto clienteIdentifiqueSeRequestDto, CancellationToken cancellationToken) =>
-            await usuarioUseCase.IdentificarClienteCpfAsync(clienteIdentifiqueSeRequestDto.Cpf, clienteIdentifiqueSeRequestDto.Senha, cancellationToken);
+        public async Task<bool> CadastrarUsuarioAsync(UsuarioRequestDto usuarioRequestDto, CancellationToken cancellationToken)
+        {
+            var ususario = new Usuario(usuarioRequestDto.Id, usuarioRequestDto.Nome, usuarioRequestDto.Email);
 
-        public async Task<TokenUsuario?> IdentificarFuncionarioAsync(FuncinarioIdentifiqueSeRequestDto funcinarioIdentifiqueSeRequestDto, CancellationToken cancellationToken) =>
-            await usuarioUseCase.IdentificarFuncionarioAsync(funcinarioIdentifiqueSeRequestDto.Email, funcinarioIdentifiqueSeRequestDto.Senha, cancellationToken);
+            return await usuarioUseCase.CadastrarUsuarioAsync(ususario, usuarioRequestDto.Senha, cancellationToken);
+        }
+
+        public async Task<TokenUsuario?> IdentificarUsuarioAsync(IdentifiqueSeRequestDto identifiqueSeRequestDto, CancellationToken cancellationToken) =>
+            await usuarioUseCase.IdentificarUsuarioAsync(identifiqueSeRequestDto.Email, identifiqueSeRequestDto.Senha, cancellationToken);
 
         public async Task<bool> ConfirmarEmailVerificacaoAsync(ConfirmarEmailVerificacaoDto confirmarEmailVerificacaoDto, CancellationToken cancellationToken)
         {

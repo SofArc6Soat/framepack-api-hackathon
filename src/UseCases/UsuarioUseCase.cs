@@ -1,5 +1,6 @@
 ﻿using Core.Domain.Base;
 using Core.Domain.Notificacoes;
+using Domain.Entities;
 using Domain.ValueObjects;
 using Gateways.Cognito;
 using Gateways.Cognito.Dtos.Response;
@@ -8,17 +9,29 @@ namespace UseCases
 {
     public class UsuarioUseCase(ICognitoGateway cognitoGateway, INotificador notificador) : BaseUseCase(notificador), IUsuarioUseCase
     {
-        public async Task<TokenUsuario?> IdentificarFuncionarioAsync(string email, string senha, CancellationToken cancellationToken) =>
-            await cognitoGateway.IdentifiqueSeAsync(email, null, senha, cancellationToken);
+        public async Task<bool> CadastrarUsuarioAsync(Usuario usuario, string senha, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(usuario);
 
-        public async Task<TokenUsuario?> IdentificarClienteCpfAsync(string cpf, string senha, CancellationToken cancellationToken) =>
-            await cognitoGateway.IdentifiqueSeAsync(null, cpf, senha, cancellationToken);
+            if (ExecutarValidacao(new ValidarUsuario(), usuario)
+                   && await cognitoGateway.CriarUsuarioAsync(usuario, senha, cancellationToken))
+            {
+                return true;
+            }
+
+            Notificar($"Ocorreu um erro ao cadastrar o usuário com o e-mail: {usuario.Email}, este e-mail já está sendo utilizado.");
+            return false;
+        }
+
+        public async Task<TokenUsuario?> IdentificarUsuarioAsync(string email, string senha, CancellationToken cancellationToken) =>
+            await cognitoGateway.IdentifiqueSeAsync(email, senha, cancellationToken);
 
         public async Task<bool> ConfirmarEmailVerificacaoAsync(EmailVerificacao emailVerificacao, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(emailVerificacao);
 
-            if (await cognitoGateway.ConfirmarEmailVerificacaoAsync(emailVerificacao, cancellationToken))
+            if (ExecutarValidacao(new ValidarEmailVerificacao(), emailVerificacao)
+                && await cognitoGateway.ConfirmarEmailVerificacaoAsync(emailVerificacao, cancellationToken))
             {
                 return true;
             }
@@ -31,7 +44,8 @@ namespace UseCases
         {
             ArgumentNullException.ThrowIfNull(recuperacaoSenha);
 
-            if (await cognitoGateway.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, cancellationToken))
+            if (ExecutarValidacao(new ValidarSolicitacaoRecuperacaoSenha(), recuperacaoSenha)
+                && await cognitoGateway.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, cancellationToken))
             {
                 return true;
             }
@@ -44,7 +58,8 @@ namespace UseCases
         {
             ArgumentNullException.ThrowIfNull(resetSenha);
 
-            if (await cognitoGateway.EfetuarResetSenhaAsync(resetSenha, cancellationToken))
+            if (ExecutarValidacao(new ValidarResetSenha(), resetSenha)
+                && await cognitoGateway.EfetuarResetSenhaAsync(resetSenha, cancellationToken))
             {
                 return true;
             }

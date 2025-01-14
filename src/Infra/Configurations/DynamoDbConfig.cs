@@ -8,13 +8,13 @@ namespace Infra.Configurations
 {
     public static class DynamoDbConfig
     {
-        public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey, IAmazonDynamoDB dynamoDbClient = null, IDynamoDBContext dynamoDbContext = null)
+        public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey)
         {
-            var clientDynamo = dynamoDbClient ?? ConfigDynamoDb(serviceUrl, accessKey, secretKey);
-            var context = dynamoDbContext ?? new DynamoDBContext(clientDynamo);
+            var clientDynamo = ConfigDynamoDb(serviceUrl, accessKey, secretKey);
+            var context = new DynamoDBContext(clientDynamo);
 
-            services.AddSingleton<IAmazonDynamoDB>(clientDynamo);
-            services.AddSingleton<IDynamoDBContext>(context);
+            services.AddSingleton(clientDynamo);
+            services.AddSingleton(context);
 
             CreateTableIfNotExists(clientDynamo).Wait();
         }
@@ -32,12 +32,11 @@ namespace Infra.Configurations
             return amazonDynamoDbClient;
         }
 
-        public static async Task CreateTableIfNotExists(IAmazonDynamoDB client)
+        private static async Task CreateTableIfNotExists(IAmazonDynamoDB client)
         {
             var listTable = new List<string>
                     {
-                        "Pagamentos",
-                        "Pedidos"
+                        "Conversoes"
                     };
 
             foreach (var tableName in listTable)

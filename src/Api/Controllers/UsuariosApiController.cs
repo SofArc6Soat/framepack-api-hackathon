@@ -2,7 +2,6 @@ using Controllers;
 using Core.Domain.Notificacoes;
 using Core.WebApi.Controller;
 using Gateways.Cognito.Dtos.Request;
-using Gateways.Dtos.Request;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,38 +11,36 @@ namespace Api.Controllers
     [Route("usuarios")]
     public class UsuariosApiController(IUsuarioController usuarioController, INotificador notificador) : MainController(notificador)
     {
-        [HttpPost("cliente/identifique-se")]
-        public async Task<IActionResult> IdentificarClienteCpf(ClienteIdentifiqueSeRequestDto request, CancellationToken cancellationToken)
+        [HttpPost]
+        public async Task<IActionResult> CadastrarUsuarioAsync(UsuarioRequestDto usuarioRequestDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return ErrorBadRequestModelState(ModelState);
             }
 
-            var result = await usuarioController.IdentificarClienteCpfAsync(request, cancellationToken);
+            var result = await usuarioController.CadastrarUsuarioAsync(usuarioRequestDto, cancellationToken);
 
-            request.Senha = "*******";
+            usuarioRequestDto.Senha = "*******";
 
-            return result == null
-                ? CustomResponsePost($"usuarios/cliente/identifique-se", request, false)
-                : CustomResponsePost($"usuarios/cliente/identifique-se", result, true);
+            return CustomResponsePost($"usuarios/{usuarioRequestDto.Id}", result, result);
         }
 
-        [HttpPost("funcionario/identifique-se")]
-        public async Task<IActionResult> IdentificarFuncionario(FuncinarioIdentifiqueSeRequestDto request, CancellationToken cancellationToken)
+        [HttpPost("identifique-se")]
+        public async Task<IActionResult> IdentificarUsuario(IdentifiqueSeRequestDto request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return ErrorBadRequestModelState(ModelState);
             }
 
-            var result = await usuarioController.IdentificarFuncionarioAsync(request, cancellationToken);
+            var result = await usuarioController.IdentificarUsuarioAsync(request, cancellationToken);
 
             request.Senha = "*******";
 
             return result == null
-                ? CustomResponsePost($"usuarios/funcionario/identifique-se", request, false)
-                : CustomResponsePost($"usuarios/funcionario/identifique-se", result, true);
+                ? CustomResponsePost($"usuarios/identifique-se", request, false)
+                : CustomResponsePost($"usuarios/identifique-se", result, true);
         }
 
         [HttpPost("email-verificacao:confirmar")]

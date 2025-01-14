@@ -29,30 +29,17 @@ namespace Gateways.Cognito
             _userPoolId = _cognitoSettings.UserPoolId;
         }
 
-        public async Task<bool> CriarUsuarioClienteAsync(Cliente cliente, string senha, CancellationToken cancellationToken)
+        public async Task<bool> CriarUsuarioAsync(Usuario usuario, string senha, CancellationToken cancellationToken)
         {
-            if (await VerificarSeCpfExisteAsync(cliente.Cpf, cancellationToken) || await VerificarSeEmailExisteAsync(cliente.Email, cancellationToken))
+            if (await VerificarSeEmailExisteAsync(usuario.Email, cancellationToken))
             {
                 return false;
             }
 
-            var signUpRequest = _cognitoFactory.CreateSignUpRequest(cliente.Email, senha, cliente.Nome, cliente.Cpf);
-            var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(cliente.Email, "cliente");
+            var signUpRequest = _cognitoFactory.CreateSignUpRequest(usuario.Email, senha, usuario.Nome);
+            var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "admin");
 
-            return await CriarUsuarioCognitoAsync(signUpRequest, adminAddUserToGroupRequest, cliente.Email, cancellationToken);
-        }
-
-        public async Task<bool> CriarUsuarioFuncionarioAsync(Funcionario funcionario, string senha, CancellationToken cancellationToken)
-        {
-            if (await VerificarSeEmailExisteAsync(funcionario.Email, cancellationToken))
-            {
-                return false;
-            }
-
-            var signUpRequest = _cognitoFactory.CreateSignUpRequest(funcionario.Email, senha, funcionario.Nome);
-            var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(funcionario.Email, "admin");
-
-            return await CriarUsuarioCognitoAsync(signUpRequest, adminAddUserToGroupRequest, funcionario.Email, cancellationToken);
+            return await CriarUsuarioCognitoAsync(signUpRequest, adminAddUserToGroupRequest, usuario.Email, cancellationToken);
         }
 
         public async Task<bool> ConfirmarEmailVerificacaoAsync(EmailVerificacao emailVerificacao, CancellationToken cancellationToken)
@@ -103,24 +90,15 @@ namespace Gateways.Cognito
             }
         }
 
-        public async Task<TokenUsuario?> IdentifiqueSeAsync(string? email, string? cpf, string senha, CancellationToken cancellationToken)
+        public async Task<TokenUsuario?> IdentifiqueSeAsync(string? email, string senha, CancellationToken cancellationToken)
         {
             var userPool = new CognitoUserPool(_userPoolId, _clientId, _cognitoClientIdentityProvider);
 
             var userId = string.Empty;
 
-            if (email is not null || cpf is not null)
+            if (email is not null)
             {
-                if (email is not null)
-                {
-                    userId = await ObertUsuarioCognitoPorEmailAsync(email, cancellationToken);
-                }
-
-                if (cpf is not null)
-                {
-                    userId = await ObterUserIdPorCpfAsync(cpf, cancellationToken);
-
-                }
+                userId = await ObertUsuarioCognitoPorEmailAsync(email, cancellationToken);
 
                 if (!string.IsNullOrEmpty(userId))
                 {
@@ -143,7 +121,6 @@ namespace Gateways.Cognito
                         return new()
                         {
                             Email = email,
-                            Cpf = cpf,
                             AccessToken = respose.AuthenticationResult.AccessToken,
                             RefreshToken = respose.AuthenticationResult.RefreshToken,
                             Expiry = expiry
@@ -231,62 +208,6 @@ namespace Gateways.Cognito
                 var response = await _cognitoClientIdentityProvider.ListUsersAsync(request, cancellationToken);
 
                 return response.Users.Count != 0;
-            }
-            catch (Exception ex)
-            {
-                throw new HttpRequestException(ex.Message);
-            }
-        }
-
-        private async Task<bool> VerificarSeCpfExisteAsync(string cpf, CancellationToken cancellationToken)
-        {
-            var usuarios = await ObterTodosUsuariosCognitoAsync(cancellationToken);
-
-            var usuariosComCpf = usuarios.FirstOrDefault(usuario =>
-                usuario.Attributes.Any(attribute =>
-                    attribute.Name == "custom:cpf" && attribute.Value == cpf));
-
-            return usuariosComCpf != null;
-        }
-
-        private async Task<string> ObterUserIdPorCpfAsync(string cpf, CancellationToken cancellationToken)
-        {
-            var usuarios = await ObterTodosUsuariosCognitoAsync(cancellationToken);
-
-            var usuariosComCpf = usuarios.FirstOrDefault(usuario =>
-                    usuario.Attributes.Any(attribute =>
-                        attribute.Name == "custom:cpf" && attribute.Value == cpf));
-
-            if (usuariosComCpf == null)
-            {
-                return string.Empty;
-            }
-
-            var emailAttribute = usuariosComCpf.Attributes.FirstOrDefault(attr => attr.Name == "email");
-
-            return emailAttribute is null ? string.Empty : emailAttribute.Value;
-        }
-
-        private async Task<List<UserType>> ObterTodosUsuariosCognitoAsync(CancellationToken cancellationToken)
-        {
-            try
-            {
-                var usuarios = new List<UserType>();
-                string? paginationToken = null;
-
-                do
-                {
-                    var request = _cognitoFactory.CreateListUsersRequestByAll(_userPoolId, paginationToken);
-
-                    var response = await _cognitoClientIdentityProvider.ListUsersAsync(request, cancellationToken);
-
-                    usuarios.AddRange(response.Users);
-
-                    paginationToken = response.PaginationToken;
-                }
-                while (!string.IsNullOrEmpty(paginationToken));
-
-                return usuarios;
             }
             catch (Exception ex)
             {

@@ -35,17 +35,9 @@ namespace Api.Configuration
     }
 
     [ExcludeFromCodeCoverage]
-    public record ConnectionStrings
-    {
-        public string DefaultConnection { get; set; } = string.Empty;
-    }
-
-    [ExcludeFromCodeCoverage]
     public record AwsSqsSettings
     {
-        public string QueueProdutoCriadoEvent { get; set; } = string.Empty;
-        public string QueueProdutoAtualizadoEvent { get; set; } = string.Empty;
-        public string QueueProdutoExcluidoEvent { get; set; } = string.Empty;
+        public string QueueConversaoCriadaEvent { get; set; } = string.Empty;
     }
 
     [ExcludeFromCodeCoverage]
