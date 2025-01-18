@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: framepack-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: framepack-api
+  template:
+    metadata:
+      labels:
+        app: framepack-api
+    spec:
+      containers:
+      - name: framepack-api
+        image: sofarc6soat/framepack-api:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: ASPNETCORE_URLS
+          value: http://+:80
