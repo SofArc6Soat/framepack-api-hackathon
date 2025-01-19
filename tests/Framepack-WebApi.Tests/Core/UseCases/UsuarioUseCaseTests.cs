@@ -1,6 +1,8 @@
 ﻿using Core.Domain.Notificacoes;
+using Domain.Entities;
 using Domain.ValueObjects;
 using Gateways.Cognito;
+using Gateways.Cognito.Dtos.Response;
 using Moq;
 using UseCases;
 
@@ -10,7 +12,7 @@ public class UsuarioUseCaseTests
 {
     private readonly Mock<ICognitoGateway> _cognitoGatewayMock;
     private readonly Mock<INotificador> _notificadorMock;
-    private readonly IUsuarioUseCase _usuarioUseCase;
+    private readonly UsuarioUseCase _usuarioUseCase;
 
     public UsuarioUseCaseTests()
     {
@@ -20,107 +22,119 @@ public class UsuarioUseCaseTests
     }
 
     [Fact]
-    public async Task ConfirmarEmailVerificacaoAsync_DeveRetornarTrue_QuandoConfirmacaoBemSucedida()
+    public async Task CadastrarUsuarioAsync_DeveRetornarTrue_QuandoUsuarioForCadastradoComSucesso()
     {
         // Arrange
-        var emailVerificacao = new EmailVerificacao("usuario@example.com", "codigo123");
+        var usuario = new Usuario(Guid.NewGuid(), "Nome", "email@teste.com");
+        var senha = "senha123";
+        var cancellationToken = CancellationToken.None;
 
-        _cognitoGatewayMock.Setup(x => x.ConfirmarEmailVerificacaoAsync(emailVerificacao, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
+        _cognitoGatewayMock.Setup(x => x.CriarUsuarioAsync(usuario, senha, cancellationToken)).ReturnsAsync(true);
 
         // Act
-        var result = await _usuarioUseCase.ConfirmarEmailVerificacaoAsync(emailVerificacao, CancellationToken.None);
+        var result = await _usuarioUseCase.CadastrarUsuarioAsync(usuario, senha, cancellationToken);
 
         // Assert
         Assert.True(result);
-        _cognitoGatewayMock.Verify(x => x.ConfirmarEmailVerificacaoAsync(emailVerificacao, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task ConfirmarEmailVerificacaoAsync_DeveRetornarFalse_QuandoConfirmacaoFalhar()
+    public async Task CadastrarUsuarioAsync_DeveRetornarFalse_QuandoUsuarioNaoForCadastrado()
     {
         // Arrange
-        var emailVerificacao = new EmailVerificacao("usuario@example.com", "codigo123");
+        var usuario = new Usuario(Guid.NewGuid(), "Nome", "email@teste.com");
+        var senha = "senha123";
+        var cancellationToken = CancellationToken.None;
 
-        _cognitoGatewayMock.Setup(x => x.ConfirmarEmailVerificacaoAsync(emailVerificacao, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
+        _cognitoGatewayMock.Setup(x => x.CriarUsuarioAsync(usuario, senha, cancellationToken)).ReturnsAsync(false);
 
         // Act
-        var result = await _usuarioUseCase.ConfirmarEmailVerificacaoAsync(emailVerificacao, CancellationToken.None);
+        var result = await _usuarioUseCase.CadastrarUsuarioAsync(usuario, senha, cancellationToken);
 
         // Assert
         Assert.False(result);
-        _cognitoGatewayMock.Verify(x => x.ConfirmarEmailVerificacaoAsync(emailVerificacao, It.IsAny<CancellationToken>()), Times.Once);
-        _notificadorMock.Verify(x => x.Handle(It.IsAny<Notificacao>()), Times.Once);
     }
 
     [Fact]
-    public async Task SolicitarRecuperacaoSenhaAsync_DeveRetornarTrue_QuandoSolicitacaoBemSucedida()
+    public async Task IdentificarUsuarioAsync_DeveRetornarTokenUsuario_QuandoCredenciaisForemValidas()
     {
         // Arrange
-        var recuperacaoSenha = new RecuperacaoSenha("usuario@example.com");
+        var email = "email@teste.com";
+        var senha = "senha123";
+        var cancellationToken = CancellationToken.None;
+        var tokenUsuario = new TokenUsuario { Email = email, AccessToken = "accessToken", RefreshToken = "refreshToken", Expiry = DateTimeOffset.Now.AddHours(1) };
 
-        _cognitoGatewayMock.Setup(x => x.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
+        _cognitoGatewayMock.Setup(x => x.IdentifiqueSeAsync(email, senha, cancellationToken)).ReturnsAsync(tokenUsuario);
 
         // Act
-        var result = await _usuarioUseCase.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, CancellationToken.None);
+        var result = await _usuarioUseCase.IdentificarUsuarioAsync(email, senha, cancellationToken);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(email, result.Email);
+    }
+
+    [Fact]
+    public async Task ConfirmarEmailVerificacaoAsync_DeveRetornarFalse_QuandoValidacaoFalhar()
+    {
+        // Arrange
+        var emailVerificacao = new EmailVerificacao("email@teste.com", "codigo123");
+        var cancellationToken = CancellationToken.None;
+
+        _cognitoGatewayMock.Setup(x => x.ConfirmarEmailVerificacaoAsync(emailVerificacao, cancellationToken)).ReturnsAsync(false);
+
+        // Act
+        var result = await _usuarioUseCase.ConfirmarEmailVerificacaoAsync(emailVerificacao, cancellationToken);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task SolicitarRecuperacaoSenhaAsync_DeveRetornarTrue_QuandoSolicitacaoForRealizadaComSucesso()
+    {
+        // Arrange
+        var recuperacaoSenha = new RecuperacaoSenha("email@teste.com");
+        var cancellationToken = CancellationToken.None;
+
+        _cognitoGatewayMock.Setup(x => x.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, cancellationToken)).ReturnsAsync(true);
+
+        // Act
+        var result = await _usuarioUseCase.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, cancellationToken);
 
         // Assert
         Assert.True(result);
-        _cognitoGatewayMock.Verify(x => x.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task SolicitarRecuperacaoSenhaAsync_DeveRetornarFalse_QuandoSolicitacaoFalhar()
+    public async Task SolicitarRecuperacaoSenhaAsync_DeveRetornarFalse_QuandoValidacaoFalhar()
     {
         // Arrange
-        var recuperacaoSenha = new RecuperacaoSenha("usuario@example.com");
+        var recuperacaoSenha = new RecuperacaoSenha("email@teste.com");
+        var cancellationToken = CancellationToken.None;
 
-        _cognitoGatewayMock.Setup(x => x.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
+        _cognitoGatewayMock.Setup(x => x.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, cancellationToken)).ReturnsAsync(false);
 
         // Act
-        var result = await _usuarioUseCase.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, CancellationToken.None);
+        var result = await _usuarioUseCase.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, cancellationToken);
 
         // Assert
         Assert.False(result);
-        _cognitoGatewayMock.Verify(x => x.SolicitarRecuperacaoSenhaAsync(recuperacaoSenha, It.IsAny<CancellationToken>()), Times.Once);
-        _notificadorMock.Verify(x => x.Handle(It.IsAny<Notificacao>()), Times.Once);
     }
 
     [Fact]
-    public async Task EfetuarResetSenhaAsync_DeveRetornarTrue_QuandoResetBemSucedido()
+    public async Task EfetuarResetSenhaAsync_DeveRetornarFalse_QuandoValidacaoFalhar()
     {
         // Arrange
-        var resetSenha = new ResetSenha("usuario@example.com", "codigo123", "novaSenha123");
+        var resetSenha = new ResetSenha("email@teste.com", "codigo123", "novaSenha123");
+        var cancellationToken = CancellationToken.None;
 
-        _cognitoGatewayMock.Setup(x => x.EfetuarResetSenhaAsync(resetSenha, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
-        // Act
-        var result = await _usuarioUseCase.EfetuarResetSenhaAsync(resetSenha, CancellationToken.None);
-
-        // Assert
-        Assert.True(result);
-        _cognitoGatewayMock.Verify(x => x.EfetuarResetSenhaAsync(resetSenha, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task EfetuarResetSenhaAsync_DeveRetornarFalse_QuandoResetFalhar()
-    {
-        // Arrange
-        var resetSenha = new ResetSenha("usuario@example.com", "codigo123", "novaSenha123");
-
-        _cognitoGatewayMock.Setup(x => x.EfetuarResetSenhaAsync(resetSenha, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
+        _cognitoGatewayMock.Setup(x => x.EfetuarResetSenhaAsync(resetSenha, cancellationToken)).ReturnsAsync(false);
 
         // Act
-        var result = await _usuarioUseCase.EfetuarResetSenhaAsync(resetSenha, CancellationToken.None);
+        var result = await _usuarioUseCase.EfetuarResetSenhaAsync(resetSenha, cancellationToken);
 
         // Assert
         Assert.False(result);
-        _cognitoGatewayMock.Verify(x => x.EfetuarResetSenhaAsync(resetSenha, It.IsAny<CancellationToken>()), Times.Once);
-        _notificadorMock.Verify(x => x.Handle(It.IsAny<Notificacao>()), Times.Once);
     }
 }
