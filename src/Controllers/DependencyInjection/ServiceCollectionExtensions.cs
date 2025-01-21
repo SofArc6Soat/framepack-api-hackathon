@@ -10,6 +10,7 @@ namespace Controllers.DependencyInjection
         public static void AddControllerDependencyServices(this IServiceCollection services)
         {
             services.AddScoped<IUsuarioController, UsuarioController>();
+            services.AddScoped<IConversaoController, ConversaoController>();
 
             services.AddUseCasesDependencyServices();
         }

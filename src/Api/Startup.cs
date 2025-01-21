@@ -2,8 +2,8 @@
 using Controllers.DependencyInjection;
 using Core.WebApi.Configurations;
 using Core.WebApi.DependencyInjection;
-using Gateways.Cognito.DependencyInjection;
 using Gateways.DependencyInjection;
+using Microsoft.AspNetCore.Http.Features;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Api
@@ -28,6 +28,11 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 500 * 1024 * 1024; // 500 MB
+            });
+
             var settings = EnvironmentConfig.ConfigureEnvironment(services, _configuration);
 
             var jwtBearerConfigureOptions = new JwtBearerConfigureOptions
@@ -42,12 +47,12 @@ namespace Api
 
             services.AddControllerDependencyServices();
 
-            //var sqsQueues = new Queues
-            //{
-            //    QueueConversaoCriadaEvent = settings.AwsSqsSettings.QueueConversaoCriadaEvent
-            //};
+            var sqsQueues = new Queues
+            {
+                QueueConversaoCriadaEvent = settings.AwsSqsSettings.QueueConversaoCriadaEvent
+            };
 
-            //services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, sqsQueues);
+            services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, sqsQueues);
 
             //services.AddGatewayCognitoDependencyServices(settings.CognitoSettings.ClientId, settings.CognitoSettings.ClientSecret, settings.CognitoSettings.UserPoolId);
         }

@@ -18,6 +18,9 @@ namespace Infra.Dto
         public DateTime Data { get; set; }
 
         [DynamoDBProperty]
+        public string NomeArquivo { get; set; } = string.Empty;
+
+        [DynamoDBProperty]
         public string? UrlArquivoVideo { get; set; } = string.Empty;
 
         [DynamoDBProperty]
