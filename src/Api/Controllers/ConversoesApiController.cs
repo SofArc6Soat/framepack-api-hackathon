@@ -22,19 +22,6 @@ namespace Api.Controllers
 
             var result = await conversaoController.EfetuarUploadAsync(request, cancellationToken);
 
-            // Upload para o S3
-            // var s3Result = await _s3Service.UploadFileAsync(file);
-
-            // Salvar metadados no DynamoDB
-            //var metadata = new VideoMetadata
-            //{
-            //    FileName = file.FileName,
-            //    ContentType = file.ContentType,
-            //    S3Url = s3Result,
-            //    UploadedAt = DateTime.UtcNow
-            //};
-            //await _dynamoDbService.SaveMetadataAsync(metadata);
-
             return CustomResponsePost($"conversoes/{request.Id}", request, result);
         }
     }

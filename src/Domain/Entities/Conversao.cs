@@ -13,8 +13,8 @@ namespace Domain.Entities
         public string NomeArquivo { get; private set; }
         public IFormFile ArquivoVideo { get; private set; }
 
-        public string? UrlArquivoVideo { get; private set; }
-        public string? UrlArquivoCompactado { get; private set; }
+        public string UrlArquivoVideo { get; private set; } = string.Empty;
+        public string UrlArquivoCompactado { get; private set; } = string.Empty;
 
         public Conversao(Guid id, Guid usuarioId, DateTime data, Status status, string nomeArquivo, IFormFile arquivoVideo)
         {
@@ -25,6 +25,12 @@ namespace Domain.Entities
             NomeArquivo = nomeArquivo;
             ArquivoVideo = arquivoVideo;
         }
+
+        public void SetUrlArquivoVideo(string urlArquivoVideo) =>
+            UrlArquivoVideo = urlArquivoVideo;
+
+        public void SetUrlArquivoCompactado(string urlArquivoCompactado) =>
+            UrlArquivoCompactado = urlArquivoCompactado;
     }
 
     public class ValidarConversao : AbstractValidator<Conversao>

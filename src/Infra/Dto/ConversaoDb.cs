@@ -21,9 +21,9 @@ namespace Infra.Dto
         public string NomeArquivo { get; set; } = string.Empty;
 
         [DynamoDBProperty]
-        public string? UrlArquivoVideo { get; set; } = string.Empty;
+        public string UrlArquivoVideo { get; set; } = string.Empty;
 
         [DynamoDBProperty]
-        public string? UrlArquivoCompactado { get; set; } = string.Empty;
+        public string UrlArquivoCompactado { get; set; } = string.Empty;
     }
 }

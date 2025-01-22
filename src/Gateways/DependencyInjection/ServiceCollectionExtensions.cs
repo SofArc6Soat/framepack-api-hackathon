@@ -1,4 +1,9 @@
-﻿using Infra.DependencyInjection;
+﻿using Amazon.SQS;
+using Core.Infra.MessageBroker;
+using Core.Infra.MessageBroker.DependencyInjection;
+using Core.Infra.S3.DependencyInjection;
+using Gateways.Dtos.Events;
+using Infra.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 
@@ -13,16 +18,19 @@ namespace Gateways.DependencyInjection
 
             services.AddInfraDependencyServices(dynamoDbServiceUrl, dynamoDbAccessKey, dynamoDbSecretKey);
 
-            // AWS SQS
-            //services.AddAwsSqsMessageBroker();
+            // AWS S3
+            services.AddAwsS3();
 
-            //services.AddSingleton<ISqsService<ConversaoCriada>>(provider => new SqsService<ConversaoCriada>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueConversaoCriadaEvent));
+            // AWS SQS
+            services.AddAwsSqsMessageBroker();
+
+            services.AddSingleton<ISqsService<ConversaoSolicitada>>(provider => new SqsService<ConversaoSolicitada>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueConversaoSolicitadaEvent));
         }
     }
 
     [ExcludeFromCodeCoverage]
     public record Queues
     {
-        public string QueueConversaoCriadaEvent { get; set; } = string.Empty;
+        public string QueueConversaoSolicitadaEvent { get; set; } = string.Empty;
     }
 }

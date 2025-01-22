@@ -1,14 +1,24 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
+using Core.Infra.MessageBroker;
+using Core.Infra.S3;
 using Domain.Entities;
+using Gateways.Dtos.Events;
 using Infra.Dto;
 
 namespace Gateways
 {
-    public class ConversaoGateway(IDynamoDBContext repository) : IConversaoGateway
+    public class ConversaoGateway(IDynamoDBContext repository, ISqsService<ConversaoSolicitada> sqsService, S3Service s3Service) : IConversaoGateway
     {
         public async Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken)
         {
-            // TODO: Efetuar upload S3
+            var urlArquivoVideo = await s3Service.UploadFileAsync(conversao.ArquivoVideo, conversao.UsuarioId);
+
+            if (string.IsNullOrEmpty(urlArquivoVideo))
+            {
+                return false;
+            }
+
+            conversao.SetUrlArquivoVideo(urlArquivoVideo);
 
             var conversaoDto = new ConversaoDb
             {
@@ -23,9 +33,17 @@ namespace Gateways
 
             await repository.SaveAsync(conversaoDto, cancellationToken);
 
-            // TODO: Gerar evento
-
-            return true;
+            return await sqsService.SendMessageAsync(GerarConversaoSolicitadaEvent(conversaoDto));
         }
+
+        private static ConversaoSolicitada GerarConversaoSolicitadaEvent(ConversaoDb conversaoDto) => new()
+        {
+            Id = conversaoDto.Id,
+            UsuarioId = conversaoDto.UsuarioId,
+            Data = conversaoDto.Data,
+            Status = conversaoDto.Status,
+            NomeArquivo = conversaoDto.NomeArquivo,
+            UrlArquivoVideo = conversaoDto.UrlArquivoVideo
+        };
     }
 }

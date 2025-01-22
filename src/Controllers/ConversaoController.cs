@@ -9,7 +9,7 @@ namespace Controllers
     {
         public async Task<bool> EfetuarUploadAsync(UploadRequestDto uploadRequestDto, CancellationToken cancellationToken)
         {
-            var conversao = new Conversao(uploadRequestDto.Id, uploadRequestDto.UsuarioId, DateTime.Now, Status.Aguardando, uploadRequestDto.NomeArquivo, uploadRequestDto.ArquivoVideo);
+            var conversao = new Conversao(uploadRequestDto.Id, uploadRequestDto.UsuarioId, DateTime.Now, Status.AguardandoConversao, uploadRequestDto.NomeArquivo, uploadRequestDto.ArquivoVideo);
 
             return await conversaoUseCase.EfetuarUploadAsync(conversao, cancellationToken);
         }

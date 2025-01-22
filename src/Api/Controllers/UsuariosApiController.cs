@@ -12,18 +12,18 @@ namespace Api.Controllers
     public class UsuariosApiController(IUsuarioController usuarioController, INotificador notificador) : MainController(notificador)
     {
         [HttpPost]
-        public async Task<IActionResult> CadastrarUsuarioAsync(UsuarioRequestDto usuarioRequestDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> CadastrarUsuarioAsync(UsuarioRequestDto request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return ErrorBadRequestModelState(ModelState);
             }
 
-            var result = await usuarioController.CadastrarUsuarioAsync(usuarioRequestDto, cancellationToken);
+            var result = await usuarioController.CadastrarUsuarioAsync(request, cancellationToken);
 
-            usuarioRequestDto.Senha = "*******";
+            request.Senha = "*******";
 
-            return CustomResponsePost($"usuarios/{usuarioRequestDto.Id}", result, result);
+            return CustomResponsePost($"usuarios/{request.Id}", request, result);
         }
 
         [HttpPost("identifique-se")]
@@ -40,7 +40,7 @@ namespace Api.Controllers
 
             return result == null
                 ? CustomResponsePost($"usuarios/identifique-se", request, false)
-                : CustomResponsePost($"usuarios/identifique-se", result, true);
+                : CustomResponsePost($"usuarios/identifique-se", request, true);
         }
 
         [HttpPost("email-verificacao:confirmar")]
@@ -53,7 +53,7 @@ namespace Api.Controllers
 
             var result = await usuarioController.ConfirmarEmailVerificacaoAsync(request, cancellationToken);
 
-            return CustomResponsePost($"usuarios/email-verificacao:confirmar", result, result);
+            return CustomResponsePost($"usuarios/email-verificacao:confirmar", request, result);
         }
 
         [HttpPost("esquecia-senha:solicitar")]
@@ -66,7 +66,7 @@ namespace Api.Controllers
 
             var result = await usuarioController.SolicitarRecuperacaoSenhaAsync(request, cancellationToken);
 
-            return CustomResponsePost($"usuarios/esquecia-senha:solicitar", result, result);
+            return CustomResponsePost($"usuarios/esquecia-senha:solicitar", request, result);
         }
 
         [HttpPost("esquecia-senha:resetar")]
@@ -81,7 +81,7 @@ namespace Api.Controllers
 
             request.NovaSenha = "*******";
 
-            return CustomResponsePost($"usuarios/esquecia-senha:resetar", result, result);
+            return CustomResponsePost($"usuarios/esquecia-senha:resetar", request, result);
         }
     }
 }

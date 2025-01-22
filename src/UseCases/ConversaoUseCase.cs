@@ -1,17 +1,23 @@
-﻿using Domain.Entities;
+﻿using Core.Domain.Base;
+using Core.Domain.Notificacoes;
+using Domain.Entities;
 using Gateways;
 
 namespace UseCases
 {
-    public class ConversaoUseCase(IConversaoGateway conversaoGateway) : IConversaoUseCase
+    public class ConversaoUseCase(IConversaoGateway conversaoGateway, INotificador notificador) : BaseUseCase(notificador), IConversaoUseCase
     {
-        public Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken)
+        public async Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(conversao);
 
-            // Validacoes adicionais
+            if (await conversaoGateway.EfetuarUploadAsync(conversao, cancellationToken))
+            {
+                return true;
+            }
 
-            return conversaoGateway.EfetuarUploadAsync(conversao, cancellationToken);
+            Notificar("Ocorreu um erro ao efetuar o upload do vídeo.");
+            return false;
         }
     }
 }

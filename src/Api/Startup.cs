@@ -2,6 +2,7 @@
 using Controllers.DependencyInjection;
 using Core.WebApi.Configurations;
 using Core.WebApi.DependencyInjection;
+using Gateways.Cognito.DependencyInjection;
 using Gateways.DependencyInjection;
 using Microsoft.AspNetCore.Http.Features;
 using System.Diagnostics.CodeAnalysis;
@@ -49,12 +50,12 @@ namespace Api
 
             var sqsQueues = new Queues
             {
-                QueueConversaoCriadaEvent = settings.AwsSqsSettings.QueueConversaoCriadaEvent
+                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent
             };
 
             services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, sqsQueues);
 
-            //services.AddGatewayCognitoDependencyServices(settings.CognitoSettings.ClientId, settings.CognitoSettings.ClientSecret, settings.CognitoSettings.UserPoolId);
+            services.AddGatewayCognitoDependencyServices(settings.CognitoSettings.ClientId, settings.CognitoSettings.ClientSecret, settings.CognitoSettings.UserPoolId);
         }
 
         public static void Configure(IApplicationBuilder app) =>

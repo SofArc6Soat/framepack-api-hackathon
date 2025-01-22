@@ -37,7 +37,7 @@ namespace Gateways.Cognito
             }
 
             var signUpRequest = _cognitoFactory.CreateSignUpRequest(usuario.Email, senha, usuario.Nome);
-            var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "admin");
+            var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "usuarios");
 
             return await CriarUsuarioCognitoAsync(signUpRequest, adminAddUserToGroupRequest, usuario.Email, cancellationToken);
         }
