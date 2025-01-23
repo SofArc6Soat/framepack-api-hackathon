@@ -2,7 +2,7 @@
 {
     public enum Status
     {
-        Aguardando,
+        AguardandoConversao,
         Processando,
         Compactando,
         Concluido

@@ -45,12 +45,8 @@ namespace Core.WebApi.DependencyInjection
                 });
 
             services.AddAuthorizationBuilder()
-                // Política para usuários no grupo "admin"
-                .AddPolicy("AdminRole", policy => policy.RequireRole("admin"))
-                // Política para usuários no grupo "cliente"
-                .AddPolicy("ClienteRole", policy => policy.RequireRole("cliente"))
-                // Política para usuários que pertencem a "admin" ou "cliente"
-                .AddPolicy("AdminOrClienteRole", policy => policy.RequireRole("admin", "cliente"));
+                // Política para usuários no grupo "usuarios"
+                .AddPolicy("UsuarioRole", policy => policy.RequireRole("usuarios"));
 
             services.AddAWSService<IAmazonCognitoIdentityProvider>();
         }

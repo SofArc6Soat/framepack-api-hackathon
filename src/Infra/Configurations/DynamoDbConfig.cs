@@ -8,13 +8,14 @@ namespace Infra.Configurations;
 
 public static class DynamoDbConfig
 {
-    public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey)
+ 
+    public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey, IAmazonDynamoDB dynamoDbClient = null, IDynamoDBContext dynamoDbContext = null)
     {
-        var clientDynamo = ConfigDynamoDb(serviceUrl, accessKey, secretKey);
-        var context = new DynamoDBContext(clientDynamo);
+        var clientDynamo = dynamoDbClient ?? ConfigDynamoDb(serviceUrl, accessKey, secretKey);
+        var context = dynamoDbContext ?? new DynamoDBContext(clientDynamo);
 
-        services.AddSingleton(clientDynamo);
-        services.AddSingleton(context);
+        services.AddSingleton<IAmazonDynamoDB>(clientDynamo);
+        services.AddSingleton<IDynamoDBContext>(context);
 
         CreateTableIfNotExists(clientDynamo).Wait();
     }

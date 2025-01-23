@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BuildingBlocks\Core.Infra.MessageBroker\Core.Infra.MessageBroker.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Core.Infra.S3\Core.Infra.S3.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Infra\Infra.csproj" />
   </ItemGroup>

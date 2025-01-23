@@ -16,5 +16,4 @@ namespace Gateways.Cognito.Dtos.Request
         [PasswordPropertyText]
         public required string Senha { get; set; }
     }
-
 }

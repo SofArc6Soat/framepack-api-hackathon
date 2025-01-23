@@ -45,11 +45,12 @@ public class CognitoGateway : ICognitoGateway
     public async Task<bool> ConfirmarEmailVerificacaoAsync(EmailVerificacao emailVerificacao, CancellationToken cancellationToken)
     {
         var confirmSignUpRequest = _cognitoFactory.CreateConfirmSignUpRequest(emailVerificacao.Email, emailVerificacao.CodigoVerificacao);
+        var signUpRequest = _cognitoFactory.CreateSignUpRequest(usuario.Email, senha, usuario.Nome);
+        var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "usuarios");
 
         try
         {
             var response = await _cognitoClientIdentityProvider.ConfirmSignUpAsync(confirmSignUpRequest, cancellationToken);
-
             return response is not null && response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
         catch

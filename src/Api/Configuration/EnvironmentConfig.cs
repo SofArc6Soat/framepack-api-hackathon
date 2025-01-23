@@ -37,7 +37,7 @@ namespace Api.Configuration
     [ExcludeFromCodeCoverage]
     public record AwsSqsSettings
     {
-        public string QueueConversaoCriadaEvent { get; set; } = string.Empty;
+        public string QueueConversaoSolicitadaEvent { get; set; } = string.Empty;
     }
 
     [ExcludeFromCodeCoverage]
