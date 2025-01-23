@@ -29,7 +29,7 @@ jobs:
       # Run unit tests with coverage and specify results directory
       - name: Run all tests with coverage
         run: |
-          dotnet test QuickFood-Backoffice.sln \
+          dotnet test Framepack-WebApi.sln \
           --configuration Release \
           --collect:"XPlat Code Coverage" \
           --results-directory tests/TestResults \
@@ -90,16 +90,16 @@ jobs:
             /o:"sofarc6soat" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.vscoveragexml.reportsPaths="tests/QuickFood-Backoffice.Tests/TestResults/**/coverage.cobertura.xml" \
+            /d:sonar.cs.vscoveragexml.reportsPaths="tests/Framepack-WebApi.Tests/TestResults/**/coverage.cobertura.xml" \
             /d:sonar.inclusions="**/*.cs" \
             /d:sonar.coverage.exclusions="**/Program.cs,**/Startup.cs" \
             /d:sonar.verbose=true
 
           # Build da solução
-          dotnet build ./QuickFood-Backoffice.sln --configuration Release
+          dotnet build ./Framepack-WebApi.sln --configuration Release
 
           # Execução dos testes com coleta de cobertura
-          dotnet test ./QuickFood-Backoffice.sln --configuration Release --no-build --collect:"XPlat Code Coverage"
+          dotnet test ./Framepack-WebApi.sln --configuration Release --no-build --collect:"XPlat Code Coverage"
 
           # Finalizando a análise no SonarCloud
           dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
@@ -160,4 +160,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push Docker Image
-        run: docker buildx build --push -t sofarc6soat/quickfood-backend-backoffice:latest -f ./src/Api/Dockerfile.publish .
+        run: docker buildx build --push -t sofarc6soat/framepack-api:latest -f ./src/Api/Dockerfile.publish .

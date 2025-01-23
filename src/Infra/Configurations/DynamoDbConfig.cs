@@ -4,76 +4,76 @@ using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infra.Configurations
+namespace Infra.Configurations;
+
+public static class DynamoDbConfig
 {
-    public static class DynamoDbConfig
+ 
+    public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey, IAmazonDynamoDB dynamoDbClient = null, IDynamoDBContext dynamoDbContext = null)
     {
-        public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey, IAmazonDynamoDB dynamoDbClient = null, IDynamoDBContext dynamoDbContext = null)
+        var clientDynamo = dynamoDbClient ?? ConfigDynamoDb(serviceUrl, accessKey, secretKey);
+        var context = dynamoDbContext ?? new DynamoDBContext(clientDynamo);
+
+        services.AddSingleton<IAmazonDynamoDB>(clientDynamo);
+        services.AddSingleton<IDynamoDBContext>(context);
+
+        CreateTableIfNotExists(clientDynamo).Wait();
+    }
+
+    private static AmazonDynamoDBClient ConfigDynamoDb(string serviceUrl, string accessKey, string secretKey)
+    {
+        var config = new AmazonDynamoDBConfig
         {
-            var clientDynamo = dynamoDbClient ?? ConfigDynamoDb(serviceUrl, accessKey, secretKey);
-            var context = dynamoDbContext ?? new DynamoDBContext(clientDynamo);
+            ServiceURL = serviceUrl
+        };
 
-            services.AddSingleton<IAmazonDynamoDB>(clientDynamo);
-            services.AddSingleton<IDynamoDBContext>(context);
+        var credentials = new BasicAWSCredentials(accessKey, secretKey);
+        var amazonDynamoDbClient = new AmazonDynamoDBClient(credentials, config);
 
-            CreateTableIfNotExists(clientDynamo).Wait();
-        }
+        return amazonDynamoDbClient;
+    }
 
-        private static AmazonDynamoDBClient ConfigDynamoDb(string serviceUrl, string accessKey, string secretKey)
-        {
-            var config = new AmazonDynamoDBConfig
-            {
-                ServiceURL = serviceUrl
-            };
-
-            var credentials = new BasicAWSCredentials(accessKey, secretKey);
-            var amazonDynamoDbClient = new AmazonDynamoDBClient(credentials, config);
-
-            return amazonDynamoDbClient;
-        }
-
-        private static async Task CreateTableIfNotExists(IAmazonDynamoDB client)
-        {
-            var listTable = new List<string>
+    public static async Task CreateTableIfNotExists(IAmazonDynamoDB client)
+    {
+        var listTable = new List<string>
                     {
                         "Conversoes"
                     };
 
-            foreach (var tableName in listTable)
+        foreach (var tableName in listTable)
+        {
+            try
             {
-                try
+                await client.DescribeTableAsync(tableName);
+            }
+            catch (ResourceNotFoundException)
+            {
+                var createTableRequest = new CreateTableRequest
                 {
-                    await client.DescribeTableAsync(tableName);
-                }
-                catch (ResourceNotFoundException)
-                {
-                    var createTableRequest = new CreateTableRequest
-                    {
-                        TableName = tableName,
-                        AttributeDefinitions =
+                    TableName = tableName,
+                    AttributeDefinitions =
                                 {
                                     new AttributeDefinition("Id", ScalarAttributeType.S)
                                 },
-                        KeySchema =
+                    KeySchema =
                                 {
                                     new KeySchemaElement("Id", KeyType.HASH)
                                 },
-                        ProvisionedThroughput = new ProvisionedThroughput
-                        {
-                            ReadCapacityUnits = 5,
-                            WriteCapacityUnits = 5
-                        }
-                    };
-
-                    await client.CreateTableAsync(createTableRequest);
-
-                    var tableStatus = "CREATING";
-                    while (tableStatus == "CREATING")
+                    ProvisionedThroughput = new ProvisionedThroughput
                     {
-                        await Task.Delay(1000);
-                        var response = await client.DescribeTableAsync(tableName);
-                        tableStatus = response.Table.TableStatus;
+                        ReadCapacityUnits = 5,
+                        WriteCapacityUnits = 5
                     }
+                };
+
+                await client.CreateTableAsync(createTableRequest);
+
+                var tableStatus = "CREATING";
+                while (tableStatus == "CREATING")
+                {
+                    await Task.Delay(1000);
+                    var response = await client.DescribeTableAsync(tableName);
+                    tableStatus = response.Table.TableStatus;
                 }
             }
         }
