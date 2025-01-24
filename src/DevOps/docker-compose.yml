@@ -18,9 +18,9 @@ services:
     volumes:
       - "./tests/schemas:/tmp/dynamo"
     environment:
-      AWS_ACCESS_KEY_ID: 'AKIA4VDBMBTV5OW266EA'
-      AWS_SECRET_ACCESS_KEY: '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'
-      AWS_REGION: 'eu-west-1'
+      AWS_ACCESS_KEY_ID: ''
+      AWS_SECRET_ACCESS_KEY: ''
+      AWS_REGION: ''
 
   framepack-api:
     build:
