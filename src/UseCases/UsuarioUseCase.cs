@@ -11,10 +11,7 @@ public class UsuarioUseCase : BaseUseCase, IUsuarioUseCase
 {
     private readonly ICognitoGateway _cognitoGateway;
 
-    public UsuarioUseCase(ICognitoGateway cognitoGateway, INotificador notificador) : base(notificador)
-    {
-        _cognitoGateway = cognitoGateway;
-    }
+    public UsuarioUseCase(ICognitoGateway cognitoGateway, INotificador notificador) : base(notificador) => _cognitoGateway = cognitoGateway;
 
     public async Task<bool> CadastrarUsuarioAsync(Usuario usuario, string senha, CancellationToken cancellationToken)
     {

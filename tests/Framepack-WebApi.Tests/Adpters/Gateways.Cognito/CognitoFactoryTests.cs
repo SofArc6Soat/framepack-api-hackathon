@@ -6,10 +6,7 @@ public class CognitoFactoryTests
 {
     private readonly CognitoFactory _cognitoFactory;
 
-    public CognitoFactoryTests()
-    {
-        _cognitoFactory = new CognitoFactory("test-client-id", "test-client-secret", "test-user-pool-id");
-    }
+    public CognitoFactoryTests() => _cognitoFactory = new CognitoFactory("test-client-id", "test-client-secret", "test-user-pool-id");
 
     [Fact]
     public void CreateSignUpRequest_DeveRetornarSignUpRequestCorreto()

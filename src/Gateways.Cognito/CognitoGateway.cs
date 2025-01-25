@@ -6,223 +6,222 @@ using Domain.ValueObjects;
 using Gateways.Cognito.Configurations;
 using Gateways.Cognito.Dtos.Response;
 
-namespace Gateways.Cognito;
-
-public class CognitoGateway : ICognitoGateway
+namespace Gateways.Cognito
 {
-    private readonly IAmazonCognitoIdentityProvider _cognitoClientIdentityProvider;
-    private readonly ICognitoFactory _cognitoFactory;
-
-    private readonly string _clientId;
-    private readonly string _clientSecret;
-    private readonly string _userPoolId;
-
-    public CognitoGateway(IAmazonCognitoIdentityProvider cognitoClientIdentityProvider, ICognitoFactory cognitoFactory, ICognitoConfig cognitoSettings)
+    public class CognitoGateway : ICognitoGateway
     {
-        _cognitoClientIdentityProvider = cognitoClientIdentityProvider;
-        _cognitoFactory = cognitoFactory;
+        private readonly IAmazonCognitoIdentityProvider _cognitoClientIdentityProvider;
+        private readonly ICognitoFactory _cognitoFactory;
 
-        var _cognitoSettings = cognitoSettings;
+        private readonly string _clientId;
+        private readonly string _clientSecret;
+        private readonly string _userPoolId;
 
-        _clientId = _cognitoSettings.ClientId;
-        _clientSecret = _cognitoSettings.ClientSecret;
-        _userPoolId = _cognitoSettings.UserPoolId;
-    }
-
-    public async Task<bool> CriarUsuarioAsync(Usuario usuario, string senha, CancellationToken cancellationToken)
-    {
-        if (await VerificarSeEmailExisteAsync(usuario.Email, cancellationToken))
+        public CognitoGateway(IAmazonCognitoIdentityProvider cognitoClientIdentityProvider, ICognitoFactory cognitoFactory, ICognitoConfig cognitoSettings)
         {
-            return false;
+            _cognitoClientIdentityProvider = cognitoClientIdentityProvider;
+            _cognitoFactory = cognitoFactory;
+
+            var _cognitoSettings = cognitoSettings;
+
+            _clientId = _cognitoSettings.ClientId;
+            _clientSecret = _cognitoSettings.ClientSecret;
+            _userPoolId = _cognitoSettings.UserPoolId;
         }
 
-        var signUpRequest = _cognitoFactory.CreateSignUpRequest(usuario.Email, senha, usuario.Nome);
-        var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "admin");
-
-        return await CriarUsuarioCognitoAsync(signUpRequest, adminAddUserToGroupRequest, usuario.Email, cancellationToken);
-    }
-
-    public async Task<bool> ConfirmarEmailVerificacaoAsync(EmailVerificacao emailVerificacao, CancellationToken cancellationToken)
-    {
-        var confirmSignUpRequest = _cognitoFactory.CreateConfirmSignUpRequest(emailVerificacao.Email, emailVerificacao.CodigoVerificacao);
-        var signUpRequest = _cognitoFactory.CreateSignUpRequest(usuario.Email, senha, usuario.Nome);
-        var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "usuarios");
-
-        try
+        public async Task<bool> CriarUsuarioAsync(Usuario usuario, string senha, CancellationToken cancellationToken)
         {
-            var response = await _cognitoClientIdentityProvider.ConfirmSignUpAsync(confirmSignUpRequest, cancellationToken);
-            return response is not null && response.HttpStatusCode == System.Net.HttpStatusCode.OK;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public async Task<bool> SolicitarRecuperacaoSenhaAsync(RecuperacaoSenha recuperacaoSenha, CancellationToken cancellationToken)
-    {
-        var forgotPasswordRequest = _cognitoFactory.CreateForgotPasswordRequest(recuperacaoSenha.Email);
-
-        try
-        {
-            var response = await _cognitoClientIdentityProvider.ForgotPasswordAsync(forgotPasswordRequest, cancellationToken);
-
-            return response is not null && response.HttpStatusCode == System.Net.HttpStatusCode.OK;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public async Task<bool> EfetuarResetSenhaAsync(ResetSenha resetSenha, CancellationToken cancellationToken)
-    {
-        var confirmForgotPasswordRequest = _cognitoFactory.CreateConfirmForgotPasswordRequest(resetSenha.Email, resetSenha.CodigoVerificacao, resetSenha.NovaSenha);
-
-        try
-        {
-            var response = await _cognitoClientIdentityProvider.ConfirmForgotPasswordAsync(confirmForgotPasswordRequest, cancellationToken);
-
-            return response is not null && response.HttpStatusCode == System.Net.HttpStatusCode.OK;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public async Task<TokenUsuario?> IdentifiqueSeAsync(string? email, string senha, CancellationToken cancellationToken)
-    {
-        var userPool = new CognitoUserPool(_userPoolId, _clientId, _cognitoClientIdentityProvider);
-
-        var userId = string.Empty;
-
-        if (email is not null)
-        {
-            userId = await ObertUsuarioCognitoPorEmailAsync(email, cancellationToken);
-
-            if (!string.IsNullOrEmpty(userId))
+            if (await VerificarSeEmailExisteAsync(usuario.Email, cancellationToken))
             {
-                var cognitoUser = new CognitoUser(userId, _clientId, userPool, _cognitoClientIdentityProvider, _clientSecret);
+                return false;
+            }
 
-                var authRequest = _cognitoFactory.CreateInitiateSrpAuthRequest(senha);
+            var signUpRequest = _cognitoFactory.CreateSignUpRequest(usuario.Email, senha, usuario.Nome);
+            var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "admin");
 
-                try
+            return await CriarUsuarioCognitoAsync(signUpRequest, adminAddUserToGroupRequest, usuario.Email, cancellationToken);
+        }
+
+        public async Task<bool> ConfirmarEmailVerificacaoAsync(EmailVerificacao emailVerificacao, CancellationToken cancellationToken)
+        {
+            var confirmSignUpRequest = _cognitoFactory.CreateConfirmSignUpRequest(emailVerificacao.Email, emailVerificacao.CodigoVerificacao);
+
+            try
+            {
+                var response = await _cognitoClientIdentityProvider.ConfirmSignUpAsync(confirmSignUpRequest, cancellationToken);
+                return response is not null && response.HttpStatusCode == System.Net.HttpStatusCode.OK;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> SolicitarRecuperacaoSenhaAsync(RecuperacaoSenha recuperacaoSenha, CancellationToken cancellationToken)
+        {
+            var forgotPasswordRequest = _cognitoFactory.CreateForgotPasswordRequest(recuperacaoSenha.Email);
+
+            try
+            {
+                var response = await _cognitoClientIdentityProvider.ForgotPasswordAsync(forgotPasswordRequest, cancellationToken);
+
+                return response is not null && response.HttpStatusCode == System.Net.HttpStatusCode.OK;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> EfetuarResetSenhaAsync(ResetSenha resetSenha, CancellationToken cancellationToken)
+        {
+            var confirmForgotPasswordRequest = _cognitoFactory.CreateConfirmForgotPasswordRequest(resetSenha.Email, resetSenha.CodigoVerificacao, resetSenha.NovaSenha);
+
+            try
+            {
+                var response = await _cognitoClientIdentityProvider.ConfirmForgotPasswordAsync(confirmForgotPasswordRequest, cancellationToken);
+
+                return response is not null && response.HttpStatusCode == System.Net.HttpStatusCode.OK;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<TokenUsuario?> IdentifiqueSeAsync(string? email, string senha, CancellationToken cancellationToken)
+        {
+            var userPool = new CognitoUserPool(_userPoolId, _clientId, _cognitoClientIdentityProvider);
+
+            var userId = string.Empty;
+
+            if (email is not null)
+            {
+                userId = await ObertUsuarioCognitoPorEmailAsync(email, cancellationToken);
+
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    var respose = await cognitoUser.StartWithSrpAuthAsync(authRequest, cancellationToken);
+                    var cognitoUser = new CognitoUser(userId, _clientId, userPool, _cognitoClientIdentityProvider, _clientSecret);
 
-                    if (respose is null || respose.ChallengeName == ChallengeNameType.NEW_PASSWORD_REQUIRED)
+                    var authRequest = _cognitoFactory.CreateInitiateSrpAuthRequest(senha);
+
+                    try
                     {
-                        return null;
+                        var respose = await cognitoUser.StartWithSrpAuthAsync(authRequest, cancellationToken);
+
+                        if (respose is null || respose.ChallengeName == ChallengeNameType.NEW_PASSWORD_REQUIRED)
+                        {
+                            return null;
+                        }
+
+                        var timeSpan = TimeSpan.FromSeconds(respose.AuthenticationResult.ExpiresIn);
+                        var expiry = DateTimeOffset.UtcNow + timeSpan;
+
+                        return new()
+                        {
+                            Email = email,
+                            AccessToken = respose.AuthenticationResult.AccessToken,
+                            RefreshToken = respose.AuthenticationResult.RefreshToken,
+                            Expiry = expiry
+                        };
                     }
-
-                    var timeSpan = TimeSpan.FromSeconds(respose.AuthenticationResult.ExpiresIn);
-                    var expiry = DateTimeOffset.UtcNow + timeSpan;
-
-                    return new()
+                    catch (NotAuthorizedException)
                     {
-                        Email = email,
-                        AccessToken = respose.AuthenticationResult.AccessToken,
-                        RefreshToken = respose.AuthenticationResult.RefreshToken,
-                        Expiry = expiry
-                    };
+                        throw new NotAuthorizedException("Credenciais inválidas.");
+                    }
+                    catch (UserNotConfirmedException)
+                    {
+                        throw new UserNotConfirmedException("Usuário não confirmado. Por favor, verifique seu e-mail.");
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(ex.Message);
+                    }
                 }
-                catch (NotAuthorizedException)
-                {
-                    throw new NotAuthorizedException("Credenciais inválidas.");
-                }
-                catch (UserNotConfirmedException)
-                {
-                    throw new UserNotConfirmedException("Usuário não confirmado. Por favor, verifique seu e-mail.");
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
+
+                return null;
             }
 
             return null;
         }
 
-        return null;
-    }
-
-    public async Task<bool> DeletarUsuarioCognitoAsync(string email, CancellationToken cancellationToken)
-    {
-        try
+        public async Task<bool> DeletarUsuarioCognitoAsync(string email, CancellationToken cancellationToken)
         {
-            var username = await ObertUsuarioCognitoPorEmailAsync(email, cancellationToken);
+            try
+            {
+                var username = await ObertUsuarioCognitoPorEmailAsync(email, cancellationToken);
 
-            if (username == null)
+                if (username == null)
+                {
+                    return false;
+                }
+
+                var adminDeleteUserRequest = _cognitoFactory.CreateAdminDeleteUserRequest(_userPoolId, username);
+
+                await _cognitoClientIdentityProvider.AdminDeleteUserAsync(adminDeleteUserRequest, cancellationToken);
+
+                return true;
+            }
+            catch (UserNotFoundException)
             {
                 return false;
             }
-
-            var adminDeleteUserRequest = _cognitoFactory.CreateAdminDeleteUserRequest(_userPoolId, username);
-
-            await _cognitoClientIdentityProvider.AdminDeleteUserAsync(adminDeleteUserRequest, cancellationToken);
-
-            return true;
-        }
-        catch (UserNotFoundException)
-        {
-            return false;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private async Task<bool> CriarUsuarioCognitoAsync(SignUpRequest signUpRequest, AdminAddUserToGroupRequest addToGroupRequest, string email, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var signUpResponse = await _cognitoClientIdentityProvider.SignUpAsync(signUpRequest, cancellationToken);
-
-            if (signUpResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            catch
             {
-                var addToGroupResponse = await _cognitoClientIdentityProvider.AdminAddUserToGroupAsync(addToGroupRequest, cancellationToken);
+                return false;
+            }
+        }
 
-                if (addToGroupResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+        private async Task<bool> CriarUsuarioCognitoAsync(SignUpRequest signUpRequest, AdminAddUserToGroupRequest addToGroupRequest, string email, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var signUpResponse = await _cognitoClientIdentityProvider.SignUpAsync(signUpRequest, cancellationToken);
+
+                if (signUpResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    return true;
+                    var addToGroupResponse = await _cognitoClientIdentityProvider.AdminAddUserToGroupAsync(addToGroupRequest, cancellationToken);
+
+                    if (addToGroupResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        return true;
+                    }
+
+                    await DeletarUsuarioCognitoAsync(email, cancellationToken);
                 }
 
-                await DeletarUsuarioCognitoAsync(email, cancellationToken);
+                return false;
             }
-
-            return false;
+            catch
+            {
+                return false;
+            }
         }
-        catch
+
+        private async Task<bool> VerificarSeEmailExisteAsync(string email, CancellationToken cancellationToken)
         {
-            return false;
-        }
-    }
+            try
+            {
+                var request = _cognitoFactory.CreateListUsersRequestByEmail(_userPoolId, email);
 
-    private async Task<bool> VerificarSeEmailExisteAsync(string email, CancellationToken cancellationToken)
-    {
-        try
+                var response = await _cognitoClientIdentityProvider.ListUsersAsync(request, cancellationToken);
+
+                return response.Users.Count != 0;
+            }
+            catch (Exception ex)
+            {
+                throw new HttpRequestException(ex.Message);
+            }
+        }
+
+        private async Task<string?> ObertUsuarioCognitoPorEmailAsync(string email, CancellationToken cancellationToken)
         {
             var request = _cognitoFactory.CreateListUsersRequestByEmail(_userPoolId, email);
 
             var response = await _cognitoClientIdentityProvider.ListUsersAsync(request, cancellationToken);
 
-            return response.Users.Count != 0;
+            var usuario = response.Users.FirstOrDefault();
+            return usuario?.Username;
         }
-        catch (Exception ex)
-        {
-            throw new HttpRequestException(ex.Message);
-        }
-    }
-
-    private async Task<string?> ObertUsuarioCognitoPorEmailAsync(string email, CancellationToken cancellationToken)
-    {
-        var request = _cognitoFactory.CreateListUsersRequestByEmail(_userPoolId, email);
-
-        var response = await _cognitoClientIdentityProvider.ListUsersAsync(request, cancellationToken);
-
-        var usuario = response.Users.FirstOrDefault();
-        return usuario?.Username;
     }
 }

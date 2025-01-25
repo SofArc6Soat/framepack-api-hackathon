@@ -2,6 +2,7 @@
 using Domain.ValueObjects;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
 
 namespace Domain.Entities
 {
@@ -22,7 +23,7 @@ namespace Domain.Entities
             UsuarioId = usuarioId;
             Data = data;
             Status = status;
-            NomeArquivo = nomeArquivo;
+            NomeArquivo = NormalizarNomeArquivo(nomeArquivo);
             ArquivoVideo = arquivoVideo;
         }
 
@@ -31,6 +32,14 @@ namespace Domain.Entities
 
         public void SetUrlArquivoCompactado(string urlArquivoCompactado) =>
             UrlArquivoCompactado = urlArquivoCompactado;
+
+        private static string NormalizarNomeArquivo(string nomeArquivo)
+        {
+            var normalizado = nomeArquivo.Replace(" ", "_");
+            normalizado = Regex.Replace(normalizado, @"[^a-zA-Z0-9_.]", "");
+            normalizado = Regex.Replace(normalizado, @"_+", "_");
+            return normalizado.ToLowerInvariant();
+        }
     }
 
     public class ValidarConversao : AbstractValidator<Conversao>

@@ -1,7 +1,7 @@
 ﻿using Amazon.Extensions.NETCore.Setup;
 using Amazon.SQS;
-using Microsoft.Extensions.DependencyInjection;
 using Core.Infra.MessageBroker.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Framepack_WebApi.Tests.Core.Infra.MessageBroker.DependencyInjection
 {

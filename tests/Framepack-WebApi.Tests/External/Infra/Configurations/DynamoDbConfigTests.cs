@@ -11,9 +11,9 @@ public class DynamoDbConfigTests
     public void ConfigDynamoDb_ValidParameters_ShouldReturnClient()
     {
         // Arrange
-        string serviceUrl = "http://localhost:8000";
-        string accessKey = "accessKey";
-        string secretKey = "secretKey";
+        var serviceUrl = "http://localhost:8000";
+        var accessKey = "accessKey";
+        var secretKey = "secretKey";
 
         // Act
         var client = typeof(DynamoDbConfig)

@@ -2,7 +2,7 @@
 using FluentValidation.TestHelper;
 using Gateways.Cognito.Dtos.Request;
 
-namespace Gateways.Cognito.Tests.Dtos.Request;
+namespace Framepack_WebApi.Tests.Adpters.Gateways.Cognito.Dtos.Request;
 
 public class UsuarioRequestDtoValidator : AbstractValidator<UsuarioRequestDto>
 {
@@ -23,10 +23,7 @@ public class UsuarioRequestDtoTests
 {
     private readonly UsuarioRequestDtoValidator _validator;
 
-    public UsuarioRequestDtoTests()
-    {
-        _validator = new UsuarioRequestDtoValidator();
-    }
+    public UsuarioRequestDtoTests() => _validator = new UsuarioRequestDtoValidator();
 
     [Fact]
     public void Should_Have_Error_When_Id_Is_Empty()

@@ -2,7 +2,7 @@
 
 namespace Gateways.Dtos.Events
 {
-    public record ConversaoSolicitada : Event
+    public record ConversaoSolicitadaEvent : Event
     {
         public Guid UsuarioId { get; set; }
         public DateTime Data { get; set; }

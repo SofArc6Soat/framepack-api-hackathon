@@ -7,18 +7,20 @@ using Infra.Dto;
 
 namespace Gateways
 {
-    public class ConversaoGateway(IDynamoDBContext repository, ISqsService<ConversaoSolicitada> sqsService, S3Service s3Service) : IConversaoGateway
+    public class ConversaoGateway(IDynamoDBContext repository, ISqsService<ConversaoSolicitadaEvent> sqsService, S3Service s3Service) : IConversaoGateway
     {
         public async Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken)
         {
-            var urlArquivoVideo = await s3Service.UploadFileAsync(conversao.ArquivoVideo, conversao.UsuarioId);
+            var urlArquivoVideo = await s3Service.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo);
 
-            if (string.IsNullOrEmpty(urlArquivoVideo))
+            var preSignedUrl = s3Service.GerarPreSignedUrl(urlArquivoVideo);
+
+            if (string.IsNullOrEmpty(preSignedUrl))
             {
                 return false;
             }
 
-            conversao.SetUrlArquivoVideo(urlArquivoVideo);
+            conversao.SetUrlArquivoVideo(preSignedUrl);
 
             var conversaoDto = new ConversaoDb
             {
@@ -36,7 +38,7 @@ namespace Gateways
             return await sqsService.SendMessageAsync(GerarConversaoSolicitadaEvent(conversaoDto));
         }
 
-        private static ConversaoSolicitada GerarConversaoSolicitadaEvent(ConversaoDb conversaoDto) => new()
+        private static ConversaoSolicitadaEvent GerarConversaoSolicitadaEvent(ConversaoDb conversaoDto) => new()
         {
             Id = conversaoDto.Id,
             UsuarioId = conversaoDto.UsuarioId,
