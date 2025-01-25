@@ -1,65 +1,63 @@
 ﻿using Core.Domain.DataAnnotations;
 
-namespace Framepack_WebApi.Tests.Core.Domain.DataAnnotations;
-
-public class RequiredGuidAttributeTests
+namespace Framepack_WebApi.Tests.Core.Domain.DataAnnotations
 {
-    private readonly RequiredGuidAttribute _attribute;
-
-    public RequiredGuidAttributeTests()
+    public class RequiredGuidAttributeTests
     {
-        _attribute = new RequiredGuidAttribute();
-    }
+        private readonly RequiredGuidAttribute _attribute;
 
-    [Fact]
-    public void IsValid_ShouldReturnFalse_WhenValueIsNull()
-    {
-        // Arrange
-        object value = null;
+        public RequiredGuidAttributeTests() => _attribute = new RequiredGuidAttribute();
 
-        // Act
-        var result = _attribute.IsValid(value);
+        [Fact]
+        public void IsValid_ShouldReturnFalse_WhenValueIsNull()
+        {
+            // Arrange
+            object value = null;
 
-        // Assert
-        Assert.False(result);
-    }
+            // Act
+            var result = _attribute.IsValid(value);
 
-    [Fact]
-    public void IsValid_ShouldReturnFalse_WhenValueIsNotGuid()
-    {
-        // Arrange
-        object value = "not a guid";
+            // Assert
+            Assert.False(result);
+        }
 
-        // Act
-        var result = _attribute.IsValid(value);
+        [Fact]
+        public void IsValid_ShouldReturnFalse_WhenValueIsNotGuid()
+        {
+            // Arrange
+            object value = "not a guid";
 
-        // Assert
-        Assert.False(result);
-    }
+            // Act
+            var result = _attribute.IsValid(value);
 
-    [Fact]
-    public void IsValid_ShouldReturnFalse_WhenValueIsEmptyGuid()
-    {
-        // Arrange
-        object value = Guid.Empty;
+            // Assert
+            Assert.False(result);
+        }
 
-        // Act
-        var result = _attribute.IsValid(value);
+        [Fact]
+        public void IsValid_ShouldReturnFalse_WhenValueIsEmptyGuid()
+        {
+            // Arrange
+            object value = Guid.Empty;
 
-        // Assert
-        Assert.False(result);
-    }
+            // Act
+            var result = _attribute.IsValid(value);
 
-    [Fact]
-    public void IsValid_ShouldReturnTrue_WhenValueIsValidGuid()
-    {
-        // Arrange
-        object value = Guid.NewGuid();
+            // Assert
+            Assert.False(result);
+        }
 
-        // Act
-        var result = _attribute.IsValid(value);
+        [Fact]
+        public void IsValid_ShouldReturnTrue_WhenValueIsValidGuid()
+        {
+            // Arrange
+            object value = Guid.NewGuid();
 
-        // Assert
-        Assert.True(result);
+            // Act
+            var result = _attribute.IsValid(value);
+
+            // Assert
+            Assert.True(result);
+        }
     }
 }

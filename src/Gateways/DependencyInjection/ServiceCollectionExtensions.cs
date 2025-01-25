@@ -24,7 +24,7 @@ namespace Gateways.DependencyInjection
             // AWS SQS
             services.AddAwsSqsMessageBroker();
 
-            services.AddSingleton<ISqsService<ConversaoSolicitada>>(provider => new SqsService<ConversaoSolicitada>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueConversaoSolicitadaEvent));
+            services.AddSingleton<ISqsService<ConversaoSolicitadaEvent>>(provider => new SqsService<ConversaoSolicitadaEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueConversaoSolicitadaEvent));
         }
     }
 

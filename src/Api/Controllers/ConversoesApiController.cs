@@ -22,7 +22,7 @@ namespace Api.Controllers
 
             var result = await conversaoController.EfetuarUploadAsync(request, cancellationToken);
 
-            return CustomResponsePost($"conversoes/{request.Id}", request, result);
+            return CustomResponsePost($"conversoes", request, result);
         }
     }
 }

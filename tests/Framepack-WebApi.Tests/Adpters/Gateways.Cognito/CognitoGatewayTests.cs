@@ -38,7 +38,7 @@ public class CognitoGatewayTests
         _mockFactory.Setup(f => f.CreateListUsersRequestByEmail(It.IsAny<string>(), usuario.Email))
             .Returns(new ListUsersRequest());
         _mockCognitoClient.Setup(c => c.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ListUsersResponse { Users = new List<UserType> { new UserType() } });
+            .ReturnsAsync(new ListUsersResponse { Users = [new UserType()] });
 
         // Act
         var result = await _cognitoGateway.CriarUsuarioAsync(usuario, "password", CancellationToken.None);
@@ -65,7 +65,7 @@ public class CognitoGatewayTests
         _mockFactory.Setup(f => f.CreateListUsersRequestByEmail(It.IsAny<string>(), usuario.Email))
             .Returns(new ListUsersRequest());
         _mockCognitoClient.Setup(c => c.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ListUsersResponse { Users = new List<UserType>() });
+            .ReturnsAsync(new ListUsersResponse { Users = [] });
 
         // Configuração para criação de usuário
         _mockCognitoClient.Setup(c => c.SignUpAsync(signUpRequest, It.IsAny<CancellationToken>()))

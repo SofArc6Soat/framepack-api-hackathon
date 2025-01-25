@@ -7,9 +7,6 @@ namespace Gateways.Dtos.Request
     public record UploadRequestDto
     {
         [RequiredGuid(ErrorMessage = "O campo {0} é obrigatório.")]
-        public Guid Id { get; set; }
-
-        [RequiredGuid(ErrorMessage = "O campo {0} é obrigatório.")]
         public Guid UsuarioId { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é obrigatório.")]
@@ -18,7 +15,7 @@ namespace Gateways.Dtos.Request
         public string NomeArquivo { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O {0} é obrigatório.")]
-        [AllowedExtensions([".mp4", ".avi", ".mpeg"])]
+        [AllowedExtensions([".mp4"])]
         [MaxFileSizeAttribute(500 * 1024 * 1024)] // 500 MB
         [Display(Name = "Arquivo de Vídeo")]
         public required IFormFile ArquivoVideo { get; set; }
