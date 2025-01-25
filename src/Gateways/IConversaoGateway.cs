@@ -1,9 +1,8 @@
 ﻿using Domain.Entities;
 
-namespace Gateways
+namespace Gateways;
+
+public interface IConversaoGateway
 {
-    public interface IConversaoGateway
-    {
-        Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken);
-    }
+    Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken);
 }
