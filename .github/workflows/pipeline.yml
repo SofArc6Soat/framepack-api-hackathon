@@ -25,6 +25,10 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      # Instalação do recode
+      - name: Install recode
+        run: sudo apt-get install -y recode
+
       # Configuração de locales e encoding UTF-8
       - name: Configure locale for UTF-8
         run: |
@@ -37,8 +41,8 @@ jobs:
       # Converter a codificação dos arquivos para UTF-8
       - name: Convert file encoding to UTF-8
         run: |
-          find . -type f -name "*.cs" -exec bash -c 'iconv -f ISO-8859-1 -t UTF-8 "{}" -o "{}.tmp" && mv "{}.tmp" "{}"' \;
-          find . -type f -name "*.cs" -exec bash -c 'iconv -f US-ASCII -t UTF-8 "{}" -o "{}.tmp" && mv "{}.tmp" "{}"' \;
+          find . -type f -name "*.cs" -exec recode ISO-8859-1..UTF-8 {} \;
+          find . -type f -name "*.cs" -exec recode US-ASCII..UTF-8 {} \;
 
       # Verificar a codificação dos arquivos
       - name: Verify file encoding
