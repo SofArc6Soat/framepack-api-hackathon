@@ -37,8 +37,8 @@ jobs:
       # Converter a codificação dos arquivos para UTF-8
       - name: Convert file encoding to UTF-8
         run: |
-          find . -type f -name "*.cs" -exec bash -c 'iconv -f ISO-8859-1 -t UTF-8 "$0" -o "$0"' {} \;
-          find . -type f -name "*.cs" -exec bash -c 'iconv -f US-ASCII -t UTF-8 "$0" -o "$0"' {} \;
+          find . -type f -name "*.cs" -exec bash -c 'iconv -f ISO-8859-1 -t UTF-8 "{}" -o "{}.tmp" && mv "{}.tmp" "{}"' \;
+          find . -type f -name "*.cs" -exec bash -c 'iconv -f US-ASCII -t UTF-8 "{}" -o "{}.tmp" && mv "{}.tmp" "{}"' \;
 
       # Verificar a codificação dos arquivos
       - name: Verify file encoding
