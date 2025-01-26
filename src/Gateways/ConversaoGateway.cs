@@ -7,13 +7,24 @@ using Infra.Dto;
 
 namespace Gateways;
 
-public class ConversaoGateway(IDynamoDBContext repository, ISqsService<ConversaoSolicitadaEvent> sqsService, S3Service s3Service) : IConversaoGateway
+public class ConversaoGateway : IConversaoGateway
 {
+    private readonly IDynamoDBContext _repository;
+    private readonly ISqsService<ConversaoSolicitadaEvent> _sqsService;
+    private readonly IS3Service _s3Service;
+
+    public ConversaoGateway(IDynamoDBContext repository, ISqsService<ConversaoSolicitadaEvent> sqsService, IS3Service s3Service)
+    {
+        _repository = repository;
+        _sqsService = sqsService;
+        _s3Service = s3Service;
+    }
+
     public async Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken)
     {
-        var urlArquivoVideo = await s3Service.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo);
+        var urlArquivoVideo = await _s3Service.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo);
 
-        var preSignedUrl = s3Service.GerarPreSignedUrl(urlArquivoVideo);
+        var preSignedUrl = _s3Service.GerarPreSignedUrl(urlArquivoVideo);
 
         if (string.IsNullOrEmpty(preSignedUrl))
         {
@@ -33,9 +44,9 @@ public class ConversaoGateway(IDynamoDBContext repository, ISqsService<Conversao
             UrlArquivoCompactado = conversao.UrlArquivoCompactado
         };
 
-        await repository.SaveAsync(conversaoDto, cancellationToken);
+        await _repository.SaveAsync(conversaoDto, cancellationToken);
 
-        return await sqsService.SendMessageAsync(GerarConversaoSolicitadaEvent(conversaoDto));
+        return await _sqsService.SendMessageAsync(GerarConversaoSolicitadaEvent(conversaoDto));
     }
 
     private static ConversaoSolicitadaEvent GerarConversaoSolicitadaEvent(ConversaoDb conversaoDto) => new()

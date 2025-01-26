@@ -181,4 +181,20 @@ public class CognitoGatewayTests
 
         Assert.False(result);
     }
+
+    [Fact]
+    public async Task IdentifiqueSeAsync_InvalidCredentials()
+    {
+        var email = "test@example.com";
+        var senha = "Test@123";
+
+        _mockCognitoFactory.Setup(x => x.CreateListUsersRequestByEmail(It.IsAny<string>(), email)).Returns(new ListUsersRequest());
+        _mockCognitoClient.Setup(x => x.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ListUsersResponse { Users = new List<UserType> { new UserType { Username = "test-user" } } });
+        _mockCognitoFactory.Setup(x => x.CreateInitiateSrpAuthRequest(senha)).Returns(new InitiateSrpAuthRequest());
+        _mockCognitoClient.Setup(x => x.AdminInitiateAuthAsync(It.IsAny<AdminInitiateAuthRequest>(), It.IsAny<CancellationToken>())).ThrowsAsync(new NotAuthorizedException("Invalid credentials"));
+
+        _mockCognitoFactory.Setup(x => x.CreateInitiateSrpAuthRequest(It.IsAny<string>())).Throws(new NotAuthorizedException("Invalid credentials"));
+
+        await Assert.ThrowsAsync<NotAuthorizedException>(() => _cognitoGateway.IdentifiqueSeAsync(email, senha, CancellationToken.None));
+    }
 }

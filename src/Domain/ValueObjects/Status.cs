@@ -1,10 +1,9 @@
-﻿namespace Domain.ValueObjects
+﻿namespace Domain.ValueObjects;
+
+public enum Status
 {
-    public enum Status
-    {
-        AguardandoConversao,
-        Processando,
-        Compactando,
-        Concluido
-    }
+    AguardandoConversao,
+    Processando,
+    Compactando,
+    Concluido
 }
