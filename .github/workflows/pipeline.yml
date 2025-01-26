@@ -16,6 +16,10 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v3
 
+      # Set UTF-8 encoding
+      - name: Set encoding to UTF-8
+        run: export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false && export LANG=en_US.UTF-8
+
       # Setup .NET Core SDK
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
@@ -26,7 +30,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore src/Api/Api.csproj
 
-      # Run unit tests with coverage and specify results directory
+      # Run unit tests with coverage
       - name: Run all tests with coverage
         run: |
           dotnet test Framepack-WebApi.sln \
@@ -39,7 +43,7 @@ jobs:
       # Display detailed logs if tests fail
       - name: Display test logs
         if: failure()
-        run: cat log-detailed.txt
+        run: cat log-detailed.txt | iconv -f utf-8 -t utf-8
 
   code_analysis:
     runs-on: ubuntu-latest
