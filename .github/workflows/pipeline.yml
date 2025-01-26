@@ -30,8 +30,6 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y locales
           sudo locale-gen en_US.UTF-8
-          export LANG=en_US.UTF-8
-          export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
         env:
           LANG: en_US.UTF-8
           DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
@@ -39,8 +37,8 @@ jobs:
       # Converter a codificação dos arquivos para UTF-8
       - name: Convert file encoding to UTF-8
         run: |
-          find . -type f -name "*.cs" -exec bash -c 'iconv -f ISO-8859-1 -t UTF-8 "$0" -o "$0"' {} \;
-          find . -type f -name "*.cs" -exec bash -c 'iconv -f US-ASCII -t UTF-8 "$0" -o "$0"' {} \;
+          find . -type f -name "*.cs" -exec iconv -f ISO-8859-1 -t UTF-8 {} -o {} \;
+          find . -type f -name "*.cs" -exec iconv -f US-ASCII -t UTF-8 {} -o {} \;
 
       # Verificar a codificação dos arquivos
       - name: Verify file encoding
