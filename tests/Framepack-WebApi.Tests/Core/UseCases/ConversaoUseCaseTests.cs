@@ -25,7 +25,7 @@ public class ConversaoUseCaseTests
     public async Task EfetuarUploadAsync_ShouldThrowArgumentNullException_WhenConversaoIsNull()
     {
         // Arrange
-        Conversao conversao = null;
+        Conversao? conversao = null;
         var cancellationToken = CancellationToken.None;
 
         // Act & Assert

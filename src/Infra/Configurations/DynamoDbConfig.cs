@@ -9,7 +9,7 @@ namespace Infra.Configurations;
 public static class DynamoDbConfig
 {
 
-    public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey, IAmazonDynamoDB dynamoDbClient = null, IDynamoDBContext dynamoDbContext = null)
+    public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey, IAmazonDynamoDB? dynamoDbClient = null, IDynamoDBContext dynamoDbContext = null)
     {
         var clientDynamo = dynamoDbClient ?? ConfigDynamoDb(serviceUrl, accessKey, secretKey);
         var context = dynamoDbContext ?? new DynamoDBContext(clientDynamo);

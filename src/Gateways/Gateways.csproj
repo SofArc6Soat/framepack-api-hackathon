@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BuildingBlocks\Core.Infra.MessageBroker\Core.Infra.MessageBroker.csproj" />
     <ProjectReference Include="..\BuildingBlocks\Core.Infra.S3\Core.Infra.S3.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
