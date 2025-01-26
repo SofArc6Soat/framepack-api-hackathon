@@ -41,7 +41,8 @@ jobs:
           --collect:"XPlat Code Coverage" \
           --results-directory tests/TestResults \
           --logger:"trx;LogFileName=TestResults.trx" \
-          --diag:log-detailed.txt
+          --diag:log-detailed.txt \
+          -- RunConfiguration.DisableAppDomain=true
 
       # Display detailed logs if tests fail
       - name: Display test logs
