@@ -36,6 +36,11 @@ jobs:
           --logger:"trx;LogFileName=TestResults.trx" \
           --diag:log-detailed.txt
 
+      # Display detailed logs if tests fail
+      - name: Display test logs
+        if: failure()
+        run: cat log-detailed.txt
+
   code_analysis:
     runs-on: ubuntu-latest
     needs: unit_test
