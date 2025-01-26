@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout do repositório 2
+      # Checkout do repositório
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -35,6 +35,17 @@ jobs:
         env:
           LANG: en_US.UTF-8
           DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
+
+      # Converter a codificação dos arquivos para UTF-8
+      - name: Convert file encoding to UTF-8
+        run: |
+          find . -type f -name "*.cs" -exec bash -c 'iconv -f ISO-8859-1 -t UTF-8 "$0" -o "$0"' {} \;
+          find . -type f -name "*.cs" -exec bash -c 'iconv -f US-ASCII -t UTF-8 "$0" -o "$0"' {} \;
+
+      # Verificar a codificação dos arquivos
+      - name: Verify file encoding
+        run: |
+          find . -type f -name "*.cs" -exec file -i {} \; | grep -v 'charset=utf-8' && exit 1 || exit 0
 
       # Restauração de dependências
       - name: Restore dependencies
