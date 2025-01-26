@@ -5,83 +5,105 @@ using Gateways.Cognito.Dtos.Request;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Controllers
+namespace Api.Controllers;
+
+[AllowAnonymous]
+[Route("usuarios")]
+public class UsuariosApiController(IUsuarioController usuarioController, INotificador notificador) : MainController(notificador)
 {
-    [AllowAnonymous]
-    [Route("usuarios")]
-    public class UsuariosApiController(IUsuarioController usuarioController, INotificador notificador) : MainController(notificador)
+    [HttpPost]
+    public async Task<IActionResult> CadastrarUsuarioAsync(UsuarioRequestDto request, CancellationToken cancellationToken)
     {
-        [HttpPost]
-        public async Task<IActionResult> CadastrarUsuarioAsync(UsuarioRequestDto request, CancellationToken cancellationToken)
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return ErrorBadRequestModelState(ModelState);
-            }
-
-            var result = await usuarioController.CadastrarUsuarioAsync(request, cancellationToken);
-
-            request.Senha = "*******";
-
-            return CustomResponsePost($"usuarios/{request.Id}", request, result);
+            return ErrorBadRequestModelState(ModelState);
         }
 
-        [HttpPost("identifique-se")]
-        public async Task<IActionResult> IdentificarUsuario(IdentifiqueSeRequestDto request, CancellationToken cancellationToken)
+        var result = await usuarioController.CadastrarUsuarioAsync(request, cancellationToken);
+
+        request.Senha = "*******";
+
+        if (!result)
         {
-            if (!ModelState.IsValid)
-            {
-                return ErrorBadRequestModelState(ModelState);
-            }
-
-            var result = await usuarioController.IdentificarUsuarioAsync(request, cancellationToken);
-
-            request.Senha = "*******";
-
-            return result == null
-                ? CustomResponsePost($"usuarios/identifique-se", request, false)
-                : CustomResponsePost($"usuarios/identifique-se", request, true);
+            return BadRequest("Falha ao cadastrar usuário.");
         }
 
-        [HttpPost("email-verificacao:confirmar")]
-        public async Task<IActionResult> ConfirmarEmailVerificaoAsync([FromBody] ConfirmarEmailVerificacaoDto request, CancellationToken cancellationToken)
+        return Created($"usuarios/{request.Id}", new { success = result });
+    }
+
+    [HttpPost("identifique-se")]
+    public async Task<IActionResult> IdentificarUsuario(IdentifiqueSeRequestDto request, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return ErrorBadRequestModelState(ModelState);
-            }
-
-            var result = await usuarioController.ConfirmarEmailVerificacaoAsync(request, cancellationToken);
-
-            return CustomResponsePost($"usuarios/email-verificacao:confirmar", request, result);
+            return ErrorBadRequestModelState(ModelState);
         }
 
-        [HttpPost("esquecia-senha:solicitar")]
-        public async Task<IActionResult> SolicitarRecuperacaoSenhaAsync([FromBody] SolicitarRecuperacaoSenhaDto request, CancellationToken cancellationToken)
+        var result = await usuarioController.IdentificarUsuarioAsync(request, cancellationToken);
+
+        request.Senha = "*******";
+
+        if (result == null)
         {
-            if (!ModelState.IsValid)
-            {
-                return ErrorBadRequestModelState(ModelState);
-            }
-
-            var result = await usuarioController.SolicitarRecuperacaoSenhaAsync(request, cancellationToken);
-
-            return CustomResponsePost($"usuarios/esquecia-senha:solicitar", request, result);
+            return BadRequest("Falha ao identificar usuário.");
         }
 
-        [HttpPost("esquecia-senha:resetar")]
-        public async Task<IActionResult> EfetuarResetSenhaAsync([FromBody] ResetarSenhaDto request, CancellationToken cancellationToken)
+        return Created($"usuarios/identifique-se", new { success = true });
+    }
+
+    [HttpPost("email-verificacao:confirmar")]
+    public async Task<IActionResult> ConfirmarEmailVerificaoAsync([FromBody] ConfirmarEmailVerificacaoDto request, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return ErrorBadRequestModelState(ModelState);
-            }
-
-            var result = await usuarioController.EfetuarResetSenhaAsync(request, cancellationToken);
-
-            request.NovaSenha = "*******";
-
-            return CustomResponsePost($"usuarios/esquecia-senha:resetar", request, result);
+            return ErrorBadRequestModelState(ModelState);
         }
+
+        var result = await usuarioController.ConfirmarEmailVerificacaoAsync(request, cancellationToken);
+
+        if (!result)
+        {
+            return BadRequest("Falha ao confirmar verificação de e-mail.");
+        }
+
+        return Created($"usuarios/email-verificacao:confirmar", new { success = result });
+    }
+
+    [HttpPost("esquecia-senha:solicitar")]
+    public async Task<IActionResult> SolicitarRecuperacaoSenhaAsync([FromBody] SolicitarRecuperacaoSenhaDto request, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ErrorBadRequestModelState(ModelState);
+        }
+
+        var result = await usuarioController.SolicitarRecuperacaoSenhaAsync(request, cancellationToken);
+
+        if (!result)
+        {
+            return BadRequest("Falha ao solicitar recuperação de senha.");
+        }
+
+        return Created($"usuarios/esquecia-senha:solicitar", new { success = result });
+    }
+
+    [HttpPost("esquecia-senha:resetar")]
+    public async Task<IActionResult> EfetuarResetSenhaAsync([FromBody] ResetarSenhaDto request, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ErrorBadRequestModelState(ModelState);
+        }
+
+        var result = await usuarioController.EfetuarResetSenhaAsync(request, cancellationToken);
+
+        request.NovaSenha = "*******";
+
+        if (!result)
+        {
+            return BadRequest("Falha ao resetar senha.");
+        }
+
+        return Created($"usuarios/esquecia-senha:resetar", new { success = result });
     }
 }

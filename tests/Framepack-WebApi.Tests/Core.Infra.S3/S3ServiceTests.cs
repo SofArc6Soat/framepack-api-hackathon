@@ -2,6 +2,7 @@
 using Amazon.S3.Model;
 using Core.Infra.S3;
 using Moq;
+using System.Net;
 
 namespace Framepack_WebApi.Tests.Core.Infra.S3;
 
@@ -17,11 +18,11 @@ public class S3ServiceTests
     }
 
     [Fact]
-    public void GerarPreSignedUrl_DeveRetornarUrl()
+    public void GerarPreSignedUrl_Success()
     {
         // Arrange
         var key = "test-key";
-        var url = "https://s3.amazonaws.com/bucket/test-key";
+        var url = "https://bucket.s3.amazonaws.com/test-key";
 
         _mockS3Client.Setup(s => s.GetPreSignedURL(It.IsAny<GetPreSignedUrlRequest>())).Returns(url);
 
@@ -33,7 +34,7 @@ public class S3ServiceTests
     }
 
     [Fact]
-    public async Task DeletarArquivoAsync_DeveDeletarArquivo()
+    public async Task DeletarArquivoAsync_Success()
     {
         // Arrange
         var key = "test-key";
@@ -49,7 +50,7 @@ public class S3ServiceTests
     }
 
     [Fact]
-    public async Task DeletarArquivoAsync_DeveLancarAmazonS3Exception()
+    public async Task DeletarArquivoAsync_Failure()
     {
         // Arrange
         var key = "test-key";
@@ -59,5 +60,39 @@ public class S3ServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<AmazonS3Exception>(() => _s3Service.DeletarArquivoAsync(key));
+    }
+
+    [Fact]
+    public async Task VerificarExistenciaArquivo_Success()
+    {
+        // Arrange
+        var bucketName = "bucket";
+        var key = "test-key";
+
+        _mockS3Client.Setup(s => s.GetObjectMetadataAsync(bucketName, key, default))
+            .ReturnsAsync(new GetObjectMetadataResponse { HttpStatusCode = HttpStatusCode.OK });
+
+        // Act
+        var result = await _s3Service.VerificarExistenciaArquivo(bucketName, key);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task VerificarExistenciaArquivo_NotFound()
+    {
+        // Arrange
+        var bucketName = "bucket";
+        var key = "test-key";
+
+        _mockS3Client.Setup(s => s.GetObjectMetadataAsync(bucketName, key, default))
+            .ThrowsAsync(new AmazonS3Exception("Not Found") { StatusCode = HttpStatusCode.NotFound });
+
+        // Act
+        var result = await _s3Service.VerificarExistenciaArquivo(bucketName, key);
+
+        // Assert
+        Assert.False(result);
     }
 }
