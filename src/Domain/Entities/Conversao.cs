@@ -27,6 +27,17 @@ namespace Domain.Entities
             ArquivoVideo = arquivoVideo;
         }
 
+        public Conversao(Guid id, Guid usuarioId, DateTime data, Status status, string nomeArquivo, string urlArquivoVideo, string urlArquivoCompactado)
+        {
+            Id = id;
+            UsuarioId = usuarioId;
+            Data = data;
+            Status = status;
+            NomeArquivo = NormalizarNomeArquivo(nomeArquivo);
+            UrlArquivoVideo = urlArquivoVideo;
+            UrlArquivoCompactado = urlArquivoCompactado;
+        }
+
         public void SetUrlArquivoVideo(string urlArquivoVideo) =>
             UrlArquivoVideo = urlArquivoVideo;
 

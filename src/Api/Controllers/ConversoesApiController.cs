@@ -24,5 +24,13 @@ namespace Api.Controllers
 
             return CustomResponsePost($"conversoes", request, result);
         }
+
+        [HttpGet("{usuarioId:guid}")]
+        public async Task<IActionResult> ObterConversoesPorUsuarioAsync([FromRoute] Guid usuarioId, CancellationToken cancellationToken)
+        {
+            var result = await conversaoController.ObterConversoesPorUsuarioAsync(usuarioId, cancellationToken);
+
+            return CustomResponseGet(result);
+        }
     }
 }

@@ -19,5 +19,8 @@ namespace UseCases
             Notificar("Ocorreu um erro ao efetuar o upload do vídeo.");
             return false;
         }
+
+        public async Task<List<Conversao>?> ObterConversoesPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken) =>
+            await conversaoGateway.ObterConversoesPorUsuarioAsync(usuarioId, cancellationToken);
     }
 }
