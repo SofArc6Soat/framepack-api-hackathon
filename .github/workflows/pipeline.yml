@@ -22,28 +22,12 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # Convert file encoding to UTF-8
-      - name: Convert file encoding to UTF-8
-        run: |
-          iconv -f ISO-8859-1 -t UTF-8 ./src/Domain/Entities/Usuario.cs -o ./src/Domain/Entities/Usuario.cs
-          iconv -f ISO-8859-1 -t UTF-8 ./src/Api/Controllers/UsuariosApiController.cs -o ./src/Api/Controllers/UsuariosApiController.cs
-          iconv -f US-ASCII -t UTF-8 ./src/Api/Program.cs -o ./src/Api/Program.cs
-
-      # Verify file encoding
-      - name: Verify file encoding
-        run: |
-          find . -type f -name "*.cs" -exec file -i {} \; | grep -v 'charset=utf-8' && exit 1 || exit 0
-
       # Restore dependencies
       - name: Restore dependencies
         run: dotnet restore src/Api/Api.csproj
 
       # Run unit tests with coverage and specify results directory
       - name: Run all tests with coverage
-        env:
-          DOTNET_CLI_TELEMETRY_OPTOUT: 1
-          DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-          LANG: C.UTF-8
         run: |
           dotnet test Framepack-WebApi.sln \
           --configuration Release \
@@ -51,11 +35,6 @@ jobs:
           --results-directory tests/TestResults \
           --logger:"trx;LogFileName=TestResults.trx" \
           --diag:log-detailed.txt
-
-      # Display detailed logs if tests fail
-      - name: Display test logs
-        if: failure()
-        run: cat log-detailed.txt
 
   code_analysis:
     runs-on: ubuntu-latest
