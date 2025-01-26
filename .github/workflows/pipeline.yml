@@ -18,7 +18,10 @@ jobs:
 
       # Set UTF-8 encoding
       - name: Set encoding to UTF-8
-        run: export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false && export LANG=en_US.UTF-8
+        run: |
+          export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+          export LANG=en_US.UTF-8
+          export LC_ALL=en_US.UTF-8
 
       # Setup .NET Core SDK
       - name: Setup .NET Core SDK
