@@ -1,55 +1,81 @@
-name: .NET Core Tests and Deployments
+name: .NET Build and Test
 
 on:
   push:
     branches:
-      - develop
       - main
   pull_request:
     branches:
-      - develop
+      - main
 
 jobs:
-  unit_test:
+  build-and-test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out the repository
+      # Checkout do repositório 2
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # Setup .NET Core SDK
-      - name: Setup .NET Core SDK
+      # Instalação do .NET
+      - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: 8.0.x
 
-      # Restore dependencies
-      - name: Restore dependencies
-        run: dotnet restore src/Api/Api.csproj
-
-      # Run unit tests with coverage and specify results directory
-      - name: Run all tests with coverage
+      # Configuração de locales e encoding UTF-8
+      - name: Configure locale for UTF-8
         run: |
-          dotnet test Framepack-WebApi.sln \
-          --configuration Release \
-          --collect:"XPlat Code Coverage" \
-          --results-directory tests/TestResults \
-          --logger:"trx;LogFileName=TestResults.trx" \
-          --diag:log-detailed.txt
+          sudo apt-get update && sudo apt-get install -y locales
+          sudo locale-gen en_US.UTF-8
+          export LANG=en_US.UTF-8
+          export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+        env:
+          LANG: en_US.UTF-8
+          DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
+
+      # Restauração de dependências
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Construção do projeto
+      - name: Build project
+        run: dotnet build --no-restore --configuration Release
+
+      # Execução dos testes
+      - name: Run tests
+        run: dotnet test --no-build --configuration Release --logger "trx;LogFileName=TestResults.trx" --results-directory tests/TestResults
+        env:
+          LANG: en_US.UTF-8
+          DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
+
+      # Publicação de resultados de cobertura de testes
+      - name: Publish code coverage
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: tests/TestResults/coverage.cobertura.xml
+
+      # Publicação de resultados de teste
+      - name: Publish Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: tests/TestResults/TestResults.trx
 
   code_analysis:
     runs-on: ubuntu-latest
-    needs: unit_test
+    needs: build-and-test
     steps:
-      # 1. Checkout do código
       - uses: actions/checkout@v3
 
-      # 2. Configuração do .NET SDK
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
 
-      # 3. Cache do SonarCloud
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
@@ -57,7 +83,6 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      # 4. Cache do SonarCloud Scanner
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
         uses: actions/cache@v3
@@ -66,25 +91,21 @@ jobs:
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
 
-      # 5. Instalação do SonarCloud Scanner
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
           dotnet tool install --global dotnet-sonarscanner
           echo "${DOTNET_ROOT}/tools" >> $GITHUB_PATH
 
-      # 6. Instalação do dotnet-coverage
       - name: Install dotnet-coverage
         run: |
           dotnet tool install --global dotnet-coverage
 
-      # 7. Configuração e análise com o SonarScanner
       - name: Build and analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN_GIT }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          # Iniciar o scanner do SonarCloud
           dotnet-sonarscanner begin \
             /k:"SofArc6Soat_quickfood-backend-backoffice" \
             /o:"sofarc6soat" \
@@ -95,13 +116,10 @@ jobs:
             /d:sonar.coverage.exclusions="**/Program.cs,**/Startup.cs" \
             /d:sonar.verbose=true
 
-          # Build da solução
           dotnet build ./Framepack-WebApi.sln --configuration Release
 
-          # Execução dos testes com coleta de cobertura
           dotnet test ./Framepack-WebApi.sln --configuration Release --no-build --collect:"XPlat Code Coverage"
 
-          # Finalizando a análise no SonarCloud
           dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
   deploy:
@@ -111,17 +129,14 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v3
 
-      # Setup .NET Core SDK
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
 
-      # Build application
       - name: Build application
         run: dotnet build src/Api/Api.csproj --configuration Release
 
-      # Deploy application
       - name: Deploy application
         run: echo "Add your deploy commands here"
 
@@ -132,13 +147,11 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v3
 
-      # Setup .NET Core SDK
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
 
-      # Run smoke tests
       - name: Run smoke tests
         run: dotnet test tests/SmokeTests/SmokeTests.csproj
 
