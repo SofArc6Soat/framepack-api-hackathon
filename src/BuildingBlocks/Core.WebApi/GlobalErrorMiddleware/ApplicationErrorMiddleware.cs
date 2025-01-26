@@ -17,7 +17,7 @@ public class ApplicationErrorMiddleware
         {
             await _next(context);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Lógica de tratamento de erro
             context.Response.StatusCode = 500;

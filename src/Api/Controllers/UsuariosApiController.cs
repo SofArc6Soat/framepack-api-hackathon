@@ -25,7 +25,7 @@ public class UsuariosApiController(IUsuarioController usuarioController, INotifi
 
         if (!result)
         {
-            return BadRequest("Falha ao cadastrar usuário.");
+            return BadRequest("Falha ao cadastrar usuario.");
         }
 
         return Created($"usuarios/{request.Id}", new { success = result });
@@ -45,7 +45,7 @@ public class UsuariosApiController(IUsuarioController usuarioController, INotifi
 
         if (result == null)
         {
-            return BadRequest("Falha ao identificar usuário.");
+            return BadRequest("Falha ao identificar usuario.");
         }
 
         return Created($"usuarios/identifique-se", new { success = true });
@@ -63,7 +63,7 @@ public class UsuariosApiController(IUsuarioController usuarioController, INotifi
 
         if (!result)
         {
-            return BadRequest("Falha ao confirmar verificação de e-mail.");
+            return BadRequest("Falha ao confirmar verificacao de e-mail.");
         }
 
         return Created($"usuarios/email-verificacao:confirmar", new { success = result });
@@ -81,7 +81,7 @@ public class UsuariosApiController(IUsuarioController usuarioController, INotifi
 
         if (!result)
         {
-            return BadRequest("Falha ao solicitar recuperação de senha.");
+            return BadRequest("Falha ao solicitar recuperacao de senha.");
         }
 
         return Created($"usuarios/esquecia-senha:solicitar", new { success = result });

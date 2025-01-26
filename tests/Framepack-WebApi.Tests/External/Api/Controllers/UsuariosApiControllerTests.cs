@@ -82,7 +82,7 @@ public class UsuariosApiControllerTests
 
         // Assert
         var actionResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Falha ao cadastrar usuário.", actionResult.Value);
+        Assert.Equal("Falha ao cadastrar usuario.", actionResult.Value);
         _usuarioControllerMock.Verify(x => x.CadastrarUsuarioAsync(usuarioRequestDto, cancellationToken), Times.Once);
     }
 
@@ -137,7 +137,7 @@ public class UsuariosApiControllerTests
 
         // Assert
         var actionResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Falha ao identificar usuário.", actionResult.Value);
+        Assert.Equal("Falha ao identificar usuario.", actionResult.Value);
         _usuarioControllerMock.Verify(x => x.IdentificarUsuarioAsync(identifiqueSeRequestDto, cancellationToken), Times.Once);
     }
 /*
@@ -186,7 +186,7 @@ public class UsuariosApiControllerTests
 
         // Assert
         var actionResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Falha ao confirmar verificação de e-mail.", actionResult.Value);
+        Assert.Equal("Falha ao confirmar verificacao de e-mail.", actionResult.Value);
         _usuarioControllerMock.Verify(x => x.ConfirmarEmailVerificacaoAsync(confirmarEmailVerificacaoDto, cancellationToken), Times.Once);
     }
 
@@ -234,7 +234,7 @@ public class UsuariosApiControllerTests
 
         // Assert
         var actionResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Falha ao solicitar recuperação de senha.", actionResult.Value);
+        Assert.Equal("Falha ao solicitar recuperacao de senha.", actionResult.Value);
         _usuarioControllerMock.Verify(x => x.SolicitarRecuperacaoSenhaAsync(solicitarRecuperacaoSenhaDto, cancellationToken), Times.Once);
     }
 /*

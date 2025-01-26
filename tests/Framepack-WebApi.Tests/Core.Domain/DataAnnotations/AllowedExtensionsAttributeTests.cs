@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Moq;
 using System.ComponentModel.DataAnnotations;
-using Xunit;
 
 namespace Framepack_WebApi.Tests.Core.Domain.DataAnnotations;
 
