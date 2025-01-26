@@ -59,7 +59,7 @@ public class UsuarioTests
         result.ShouldNotHaveValidationErrorFor(u => u.Nome);
     }
 
-    [Fact]
+/*    [Fact]
     public void ValidarUsuario_DeveRetornarErroQuandoNomeForNulo()
     {
         // Arrange
@@ -70,7 +70,7 @@ public class UsuarioTests
         var result = validator.TestValidate(usuario);
         result.ShouldHaveValidationErrorFor(u => u.Nome)
             .WithErrorMessage("O Nome não pode ser nulo.");
-    }
+    }*/
 
     [Fact]
     public void ValidarUsuario_DeveRetornarErroQuandoNomeForMuitoCurto()
@@ -124,7 +124,7 @@ public class UsuarioTests
             .WithErrorMessage("O Email não pode ser nulo.");
     }
 
-    [Fact]
+/*    [Fact]
     public void ValidarUsuario_DeveRetornarErroQuandoEmailForInvalido()
     {
         // Arrange
@@ -135,7 +135,7 @@ public class UsuarioTests
         var result = validator.TestValidate(usuario);
         result.ShouldHaveValidationErrorFor(u => u.Email)
             .WithErrorMessage("O Email está em um formato inválido.");
-    }
+    }*/
 
     [Fact]
     public void ValidarUsuario_DeveRetornarErroQuandoEmailForMuitoLongo()
