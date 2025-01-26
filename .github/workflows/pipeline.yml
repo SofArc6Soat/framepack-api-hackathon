@@ -28,7 +28,7 @@ jobs:
 
       # Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore src/Api/Api.csproj
+        run: dotnet restore ./Framepack-WebApi.sln
 
       # Run unit tests with coverage
       - name: Run all tests with coverage
