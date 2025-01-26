@@ -8,7 +8,7 @@ using Xunit.Sdk;
 
 namespace Framepack_WebApi.Tests;
 
-public class TestInitialization : Xunit.Sdk.TestFramework
+public class TestInitialization : TestFramework
 {
     public TestInitialization(IMessageSink messageSink) : base(messageSink)
     {
