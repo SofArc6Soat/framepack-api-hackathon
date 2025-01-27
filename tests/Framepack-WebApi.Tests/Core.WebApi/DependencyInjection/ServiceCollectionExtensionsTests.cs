@@ -13,10 +13,7 @@ public class ServiceCollectionExtensionsTests
 {
     private readonly IServiceCollection _services;
 
-    public ServiceCollectionExtensionsTests()
-    {
-        _services = new ServiceCollection();
-    }
+    public ServiceCollectionExtensionsTests() => _services = new ServiceCollection();
 
     [Fact]
     public void AddApiDefautConfig_ShouldConfigureAllServices_Successfully()

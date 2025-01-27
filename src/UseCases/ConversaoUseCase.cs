@@ -19,5 +19,35 @@ namespace UseCases
             Notificar("Ocorreu um erro ao efetuar o upload do vídeo.");
             return false;
         }
+
+        public async Task<List<Conversao>?> ObterConversoesPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken) =>
+            await conversaoGateway.ObterConversoesPorUsuarioAsync(usuarioId, cancellationToken);
+
+        public async Task<Arquivo?> EfetuarDownloadAsync(Guid usuarioId, Guid conversaoId, CancellationToken cancellationToken)
+        {
+            var conversao = await conversaoGateway.ObterConversaoAsync(usuarioId, conversaoId, cancellationToken);
+
+            if (conversao is null)
+            {
+                Notificar("Conversao Inexistente");
+                return null;
+            }
+
+            if (string.IsNullOrEmpty(conversao.UrlArquivoCompactado))
+            {
+                Notificar("O arquivo compactado ainda não está disponível para download");
+                return null;
+            }
+
+            var arquivoDownload = await conversaoGateway.EfetuarDownloadAsync(conversao, cancellationToken);
+
+            if (arquivoDownload is null)
+            {
+                Notificar("Falha ao efetuar o download");
+                return null;
+            }
+
+            return arquivoDownload;
+        }
     }
 }

@@ -50,10 +50,11 @@ public class ConversaoSolicitadaEventTests
     public void ConversaoSolicitadaEvent_ShouldAcceptMinValueForData()
     {
         // Arrange
-        var evento = new ConversaoSolicitadaEvent();
-
-        // Act
-        evento.Data = DateTime.MinValue;
+        var evento = new ConversaoSolicitadaEvent
+        {
+            // Act
+            Data = DateTime.MinValue
+        };
 
         // Assert
         Assert.Equal(DateTime.MinValue, evento.Data);

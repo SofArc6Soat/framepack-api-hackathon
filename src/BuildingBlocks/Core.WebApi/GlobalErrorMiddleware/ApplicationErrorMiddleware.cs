@@ -6,10 +6,7 @@ public class ApplicationErrorMiddleware
 {
     private readonly RequestDelegate _next;
 
-    public ApplicationErrorMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
+    public ApplicationErrorMiddleware(RequestDelegate next) => _next = next;
 
     public async Task InvokeAsync(HttpContext context)
     {

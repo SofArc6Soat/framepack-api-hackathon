@@ -38,7 +38,7 @@ public class CognitoGatewayTests
         var signUpRequest = new SignUpRequest();
         var addToGroupRequest = new AdminAddUserToGroupRequest();
         var listUsersRequest = new ListUsersRequest();
-        var listUsersResponse = new ListUsersResponse { Users = new List<UserType>() };
+        var listUsersResponse = new ListUsersResponse { Users = [] };
 
         _mockCognitoFactory.Setup(x => x.CreateSignUpRequest(usuario.Email, senha, usuario.Nome, null)).Returns(signUpRequest);
         _mockCognitoFactory.Setup(x => x.CreateAddUserToGroupRequest(usuario.Email, "admin")).Returns(addToGroupRequest);
@@ -58,7 +58,7 @@ public class CognitoGatewayTests
         var usuario = new Usuario(Guid.NewGuid(), "Test User", "test@example.com");
         var senha = "Test@123";
         var listUsersRequest = new ListUsersRequest();
-        var listUsersResponse = new ListUsersResponse { Users = new List<UserType> { new UserType() } };
+        var listUsersResponse = new ListUsersResponse { Users = [new UserType()] };
 
         _mockCognitoFactory.Setup(x => x.CreateListUsersRequestByEmail(It.IsAny<string>(), usuario.Email)).Returns(listUsersRequest);
         _mockCognitoClient.Setup(x => x.ListUsersAsync(listUsersRequest, It.IsAny<CancellationToken>())).ReturnsAsync(listUsersResponse);
@@ -160,7 +160,7 @@ public class CognitoGatewayTests
         var deleteUserRequest = new AdminDeleteUserRequest();
 
         _mockCognitoFactory.Setup(x => x.CreateListUsersRequestByEmail(It.IsAny<string>(), email)).Returns(new ListUsersRequest());
-        _mockCognitoClient.Setup(x => x.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ListUsersResponse { Users = new List<UserType> { new UserType { Username = username } } });
+        _mockCognitoClient.Setup(x => x.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ListUsersResponse { Users = [new UserType { Username = username }] });
         _mockCognitoFactory.Setup(x => x.CreateAdminDeleteUserRequest(It.IsAny<string>(), username)).Returns(deleteUserRequest);
         _mockCognitoClient.Setup(x => x.AdminDeleteUserAsync(deleteUserRequest, It.IsAny<CancellationToken>())).ReturnsAsync(new AdminDeleteUserResponse { HttpStatusCode = HttpStatusCode.OK });
 
@@ -175,7 +175,7 @@ public class CognitoGatewayTests
         var email = "test@example.com";
 
         _mockCognitoFactory.Setup(x => x.CreateListUsersRequestByEmail(It.IsAny<string>(), email)).Returns(new ListUsersRequest());
-        _mockCognitoClient.Setup(x => x.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ListUsersResponse { Users = new List<UserType>() });
+        _mockCognitoClient.Setup(x => x.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ListUsersResponse { Users = [] });
 
         var result = await _cognitoGateway.DeletarUsuarioCognitoAsync(email, CancellationToken.None);
 
@@ -189,7 +189,7 @@ public class CognitoGatewayTests
         var senha = "Test@123";
 
         _mockCognitoFactory.Setup(x => x.CreateListUsersRequestByEmail(It.IsAny<string>(), email)).Returns(new ListUsersRequest());
-        _mockCognitoClient.Setup(x => x.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ListUsersResponse { Users = new List<UserType> { new UserType { Username = "test-user" } } });
+        _mockCognitoClient.Setup(x => x.ListUsersAsync(It.IsAny<ListUsersRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ListUsersResponse { Users = [new UserType { Username = "test-user" }] });
         _mockCognitoFactory.Setup(x => x.CreateInitiateSrpAuthRequest(senha)).Returns(new InitiateSrpAuthRequest());
         _mockCognitoClient.Setup(x => x.AdminInitiateAuthAsync(It.IsAny<AdminInitiateAuthRequest>(), It.IsAny<CancellationToken>())).ThrowsAsync(new NotAuthorizedException("Invalid credentials"));
 
