@@ -12,11 +12,11 @@ WORKDIR /src
 # Copiar arquivos de projeto e restaurar dependências
 COPY ["src/Api/Api.csproj", "./src/Api/"]
 #
-COPY ["src/Application/UseCases.csproj", "./src/UseCases/"]
+COPY ["src/UseCases/UseCases.csproj", "./src/UseCases/"]
 #
 COPY ["src/BuildingBlocks/Core.Domain/Core.Domain.csproj", "./src/Core.Domain/"]
-COPY ["src/BuildingBlocks/Core.Infra/Core.Infra.csproj", "./src/Core.Infra/"]
 COPY ["src/BuildingBlocks/Core.Infra.MessageBroker/Core.Infra.MessageBroker.csproj", "./src/Core.Infra.MessageBroker/"]
+COPY ["src/BuildingBlocks/Core.Infra.S3/Core.Infra.S3.csproj", "./src/Core.Infra.S3/"]
 COPY ["src/BuildingBlocks/Core.WebApi/Core.WebApi.csproj", "./src/Core.WebApi/"]
 #
 COPY ["src/Controllers/Controllers.csproj", "./src/Controllers/"]
