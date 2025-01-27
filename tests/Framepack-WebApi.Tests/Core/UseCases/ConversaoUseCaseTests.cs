@@ -22,46 +22,101 @@ public class ConversaoUseCaseTests
     }
 
     [Fact]
-    public async Task EfetuarUploadAsync_ShouldThrowArgumentNullException_WhenConversaoIsNull()
+    public async Task EfetuarUploadAsync_Success()
     {
-        // Arrange
-        Conversao? conversao = null;
-        var cancellationToken = CancellationToken.None;
-
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _conversaoUseCase.EfetuarUploadAsync(conversao, cancellationToken));
-    }
-
-    [Fact]
-    public async Task EfetuarUploadAsync_ShouldReturnTrue_WhenUploadIsSuccessful()
-    {
-        // Arrange
         var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, Status.AguardandoConversao, "video.mp4", null);
-        var cancellationToken = CancellationToken.None;
+        _conversaoGatewayMock.Setup(g => g.EfetuarUploadAsync(conversao, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
-        _conversaoGatewayMock.Setup(x => x.EfetuarUploadAsync(conversao, cancellationToken)).ReturnsAsync(true);
+        var result = await _conversaoUseCase.EfetuarUploadAsync(conversao, CancellationToken.None);
 
-        // Act
-        var result = await _conversaoUseCase.EfetuarUploadAsync(conversao, cancellationToken);
-
-        // Assert
         Assert.True(result);
+        _notificadorMock.Verify(n => n.Handle(It.IsAny<Notificacao>()), Times.Never);
     }
 
     [Fact]
-    public async Task EfetuarUploadAsync_ShouldReturnFalse_WhenUploadFails()
+    public async Task EfetuarUploadAsync_Failure()
     {
-        // Arrange
         var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, Status.AguardandoConversao, "video.mp4", null);
-        var cancellationToken = CancellationToken.None;
+        _conversaoGatewayMock.Setup(g => g.EfetuarUploadAsync(conversao, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
-        _conversaoGatewayMock.Setup(x => x.EfetuarUploadAsync(conversao, cancellationToken)).ReturnsAsync(false);
+        var result = await _conversaoUseCase.EfetuarUploadAsync(conversao, CancellationToken.None);
 
-        // Act
-        var result = await _conversaoUseCase.EfetuarUploadAsync(conversao, cancellationToken);
-
-        // Assert
         Assert.False(result);
-        _notificadorMock.Verify(x => x.Handle(It.Is<Notificacao>(n => n.Mensagem == "Ocorreu um erro ao efetuar o upload do vídeo.")), Times.Once);
+        _notificadorMock.Verify(n => n.Handle(It.Is<Notificacao>(n => n.Mensagem == "Ocorreu um erro ao efetuar o upload do vídeo.")), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObterConversoesPorUsuarioAsync_Success()
+    {
+        var usuarioId = Guid.NewGuid();
+        var conversoes = new List<Conversao> { new Conversao(Guid.NewGuid(), usuarioId, DateTime.Now, Status.Concluido, "video.mp4", null) };
+        _conversaoGatewayMock.Setup(g => g.ObterConversoesPorUsuarioAsync(usuarioId, It.IsAny<CancellationToken>())).ReturnsAsync(conversoes);
+
+        var result = await _conversaoUseCase.ObterConversoesPorUsuarioAsync(usuarioId, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Single(result);
+    }
+
+    [Fact]
+    public async Task EfetuarDownloadAsync_Success()
+    {
+        var usuarioId = Guid.NewGuid();
+        var conversaoId = Guid.NewGuid();
+        var conversao = new Conversao(conversaoId, usuarioId, DateTime.Now, Status.Concluido, "video.mp4", "urlVideo", "urlCompactado");
+        var arquivo = new Arquivo(new byte[] { 1, 2, 3 }, "video.mp4");
+
+        _conversaoGatewayMock.Setup(g => g.ObterConversaoAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync(conversao);
+        _conversaoGatewayMock.Setup(g => g.EfetuarDownloadAsync(conversao, It.IsAny<CancellationToken>())).ReturnsAsync(arquivo);
+
+        var result = await _conversaoUseCase.EfetuarDownloadAsync(usuarioId, conversaoId, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(arquivo, result);
+    }
+
+    [Fact]
+    public async Task EfetuarDownloadAsync_ConversaoInexistente()
+    {
+        var usuarioId = Guid.NewGuid();
+        var conversaoId = Guid.NewGuid();
+
+        _conversaoGatewayMock.Setup(g => g.ObterConversaoAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync((Conversao)null);
+
+        var result = await _conversaoUseCase.EfetuarDownloadAsync(usuarioId, conversaoId, CancellationToken.None);
+
+        Assert.Null(result);
+        _notificadorMock.Verify(n => n.Handle(It.Is<Notificacao>(n => n.Mensagem == "Conversao Inexistente")), Times.Once);
+    }
+
+    [Fact]
+    public async Task EfetuarDownloadAsync_ArquivoCompactadoNaoDisponivel()
+    {
+        var usuarioId = Guid.NewGuid();
+        var conversaoId = Guid.NewGuid();
+        var conversao = new Conversao(conversaoId, usuarioId, DateTime.Now, Status.Concluido, "video.mp4", "urlVideo", null);
+
+        _conversaoGatewayMock.Setup(g => g.ObterConversaoAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync(conversao);
+
+        var result = await _conversaoUseCase.EfetuarDownloadAsync(usuarioId, conversaoId, CancellationToken.None);
+
+        Assert.Null(result);
+        _notificadorMock.Verify(n => n.Handle(It.Is<Notificacao>(n => n.Mensagem == "O arquivo compactado ainda não está disponível para download")), Times.Once);
+    }
+
+    [Fact]
+    public async Task EfetuarDownloadAsync_FalhaNoDownload()
+    {
+        var usuarioId = Guid.NewGuid();
+        var conversaoId = Guid.NewGuid();
+        var conversao = new Conversao(conversaoId, usuarioId, DateTime.Now, Status.Concluido, "video.mp4", "urlVideo", "urlCompactado");
+
+        _conversaoGatewayMock.Setup(g => g.ObterConversaoAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync(conversao);
+        _conversaoGatewayMock.Setup(g => g.EfetuarDownloadAsync(conversao, It.IsAny<CancellationToken>())).ReturnsAsync((Arquivo)null);
+
+        var result = await _conversaoUseCase.EfetuarDownloadAsync(usuarioId, conversaoId, CancellationToken.None);
+
+        Assert.Null(result);
+        _notificadorMock.Verify(n => n.Handle(It.Is<Notificacao>(n => n.Mensagem == "Falha ao efetuar o download")), Times.Once);
     }
 }
