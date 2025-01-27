@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    user: root
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+
+  dynamodb-local-setup:
+    container_name: dynamodb-local-setup
+    image: amazon/aws-cli
+    volumes:
+      - "./tests/schemas:/tmp/dynamo"
+    environment:
+      AWS_ACCESS_KEY_ID: ''
+      AWS_SECRET_ACCESS_KEY: ''
+      AWS_REGION: ''
+
+  framepack-api:
+    build:
+      context: ../../src
+      dockerfile: ./Api/Dockerfile
+    restart: always
+    image: framepack-api
+    container_name: framepack-api
+    ports:
+      - 5000:80
+      - 5001:443
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_HTTPS_PORTS=443
+      - ASPNETCORE_HTTP_PORTS=80
+    volumes:
+      - ./certs:/https:ro
+    networks:
+      - framepack-api-network
+
+networks:
+  framepack-api-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.172.0.0/16
+          gateway: 172.172.0.1
