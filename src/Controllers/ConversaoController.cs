@@ -19,21 +19,23 @@ namespace Controllers
         {
             var conversoes = await conversaoUseCase.ObterConversoesPorUsuarioAsync(usuarioId, cancellationToken);
 
-            var lista = new List<ObterCoversoesResult>([]);
-
-            if (conversoes is not null)
+            if (conversoes is null || !conversoes.Any())
             {
-                foreach (var item in conversoes)
+                return null;
+            }
+
+            var lista = new List<ObterCoversoesResult>();
+
+            foreach (var item in conversoes)
+            {
+                lista.Add(new ObterCoversoesResult
                 {
-                    lista.Add(new ObterCoversoesResult
-                    {
-                        Id = item.Id,
-                        Data = item.Data,
-                        Status = item.Status.ToString(),
-                        NomeArquivo = item.NomeArquivo,
-                        UrlArquivoCompactado = item.UrlArquivoCompactado
-                    });
-                }
+                    Id = item.Id,
+                    Data = item.Data,
+                    Status = item.Status.ToString(),
+                    NomeArquivo = item.NomeArquivo,
+                    UrlArquivoCompactado = item.UrlArquivoCompactado
+                });
             }
 
             return lista;
