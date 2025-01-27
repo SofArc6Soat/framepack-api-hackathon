@@ -21,7 +21,7 @@ namespace Controllers
 
             var lista = new List<ObterCoversoesResult>([]);
 
-            if(conversoes is not null)
+            if (conversoes is not null)
             {
                 foreach (var item in conversoes)
                 {
@@ -29,7 +29,7 @@ namespace Controllers
                     {
                         Id = item.Id,
                         Data = item.Data,
-                        Status = item.Status,
+                        Status = item.Status.ToString(),
                         NomeArquivo = item.NomeArquivo,
                         UrlArquivoCompactado = item.UrlArquivoCompactado
                     });
@@ -38,5 +38,8 @@ namespace Controllers
 
             return lista;
         }
+
+        public async Task<Arquivo?> EfetuarDownloadAsync(Guid usuarioId, Guid conversaoId, CancellationToken cancellationToken) =>
+            await conversaoUseCase.EfetuarDownloadAsync(usuarioId, conversaoId, cancellationToken);
     }
 }

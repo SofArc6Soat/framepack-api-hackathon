@@ -6,10 +6,7 @@ public class ApplicationErrorMiddleware
 {
     private readonly RequestDelegate _next;
 
-    public ApplicationErrorMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
+    public ApplicationErrorMiddleware(RequestDelegate next) => _next = next;
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -17,7 +14,7 @@ public class ApplicationErrorMiddleware
         {
             await _next(context);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Lógica de tratamento de erro
             context.Response.StatusCode = 500;

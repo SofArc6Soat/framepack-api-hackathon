@@ -1,10 +1,12 @@
 ﻿using Domain.Entities;
-using Gateways.Dtos.Result;
 
-namespace Gateways;
-
-public interface IConversaoGateway
+namespace Gateways
 {
-    Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken);
-    Task<List<Conversao>?> ObterConversoesPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken);
+    public interface IConversaoGateway
+    {
+        Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken);
+        Task<List<Conversao>?> ObterConversoesPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken);
+        Task<Conversao?> ObterConversaoAsync(Guid usuarioId, Guid conversaoId, CancellationToken cancellationToken);
+        Task<Arquivo?> EfetuarDownloadAsync(Conversao conversao, CancellationToken cancellationToken);
+    }
 }

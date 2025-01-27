@@ -4,7 +4,7 @@ using Gateways.Dtos.Request;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace Gateways.Tests.Dtos.Request;
+namespace Framepack_WebApi.Tests.Adpters.Gateways.Dtos;
 
 public class UploadRequestDtoValidator : AbstractValidator<UploadRequestDto>
 {
@@ -22,15 +22,23 @@ public class UploadRequestDtoValidator : AbstractValidator<UploadRequestDto>
 
     private bool HaveValidExtension(IFormFile file)
     {
-        if (file == null) return false;
+        if (file == null)
+        {
+            return false;
+        }
+
         var allowedExtensions = new List<string> { ".mp4" };
-        var extension = System.IO.Path.GetExtension(file.FileName);
+        var extension = Path.GetExtension(file.FileName);
         return allowedExtensions.Contains(extension.ToLower());
     }
 
     private bool HaveValidSize(IFormFile file)
     {
-        if (file == null) return false;
+        if (file == null)
+        {
+            return false;
+        }
+
         const long maxFileSize = 500 * 1024 * 1024; // 500 MB
         return file.Length <= maxFileSize;
     }
@@ -40,10 +48,7 @@ public class UploadRequestDtoTests
 {
     private readonly UploadRequestDtoValidator _validator;
 
-    public UploadRequestDtoTests()
-    {
-        _validator = new UploadRequestDtoValidator();
-    }
+    public UploadRequestDtoTests() => _validator = new UploadRequestDtoValidator();
 
     [Fact]
     public void Should_Have_Error_When_UsuarioId_Is_Empty()

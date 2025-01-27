@@ -15,14 +15,12 @@ namespace Gateways
         {
             var urlArquivoVideo = await s3Service.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo);
 
-            var preSignedUrl = s3Service.GerarPreSignedUrl(urlArquivoVideo);
-
-            if (string.IsNullOrEmpty(preSignedUrl))
+            if (string.IsNullOrEmpty(urlArquivoVideo))
             {
                 return false;
             }
 
-            conversao.SetUrlArquivoVideo(preSignedUrl);
+            conversao.SetUrlArquivoVideo(urlArquivoVideo);
 
             var conversaoDto = new ConversaoDb
             {
@@ -50,6 +48,39 @@ namespace Gateways
             var conversaoDb = await repository.ScanAsync<ConversaoDb>(conditions).GetRemainingAsync(cancellationToken);
 
             return conversaoDb.Select(item => ToConversao(item)).ToList();
+        }
+
+        public async Task<Arquivo?> EfetuarDownloadAsync(Conversao conversao, CancellationToken cancellationToken)
+        {
+            using var httpClient = new HttpClient();
+
+            var url = s3Service.GerarPreSignedUrl(conversao.UrlArquivoCompactado);
+
+            var response = await httpClient.GetAsync(url, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException("Erro ao acessar o arquivo para download.");
+            }
+
+            var arquivoBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+
+            return arquivoBytes is null ? null : new Arquivo(arquivoBytes, string.Concat(conversao.NomeArquivo, ".zip"));
+        }
+
+        public async Task<Conversao?> ObterConversaoAsync(Guid usuarioId, Guid conversaoId, CancellationToken cancellationToken)
+        {
+            var conditions = new List<ScanCondition>
+                {
+                    new("Id", ScanOperator.Equal, conversaoId),
+                    new("UsuarioId", ScanOperator.Equal, usuarioId)
+                };
+
+            var conversaoDb = await repository.ScanAsync<ConversaoDb>(conditions).GetRemainingAsync(cancellationToken);
+
+            var conversao = conversaoDb.FirstOrDefault();
+
+            return conversao is not null ? ToConversao(conversao) : null;
         }
 
         private static ConversaoSolicitadaEvent GerarConversaoSolicitadaEvent(ConversaoDb conversaoDto) => new()

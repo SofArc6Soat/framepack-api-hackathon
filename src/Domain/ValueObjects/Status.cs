@@ -5,5 +5,6 @@ public enum Status
     AguardandoConversao,
     Processando,
     Compactando,
-    Concluido
+    Concluido,
+    Erro
 }
