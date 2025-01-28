@@ -25,15 +25,16 @@ public class ConversaoControllerTests
         // Arrange
         var uploadRequestDto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "video.mp4",
             ArquivoVideo = Mock.Of<IFormFile>()
         };
         _conversaoUseCaseMock.Setup(x => x.EfetuarUploadAsync(It.IsAny<Conversao>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
+        var usuarioId = "id-do-usuario";
+
         // Act
-        var result = await _controller.EfetuarUploadAsync(uploadRequestDto, CancellationToken.None);
+        var result = await _controller.EfetuarUploadAsync(uploadRequestDto, usuarioId, CancellationToken.None);
 
         // Assert
         Assert.True(result);
@@ -46,15 +47,16 @@ public class ConversaoControllerTests
         // Arrange
         var uploadRequestDto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "video.mp4",
             ArquivoVideo = Mock.Of<IFormFile>()
         };
         _conversaoUseCaseMock.Setup(x => x.EfetuarUploadAsync(It.IsAny<Conversao>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
+        var usuarioId = "id-do-usuario";
+
         // Act
-        var result = await _controller.EfetuarUploadAsync(uploadRequestDto, CancellationToken.None);
+        var result = await _controller.EfetuarUploadAsync(uploadRequestDto, usuarioId, CancellationToken.None);
 
         // Assert
         Assert.False(result);
@@ -65,10 +67,10 @@ public class ConversaoControllerTests
     public async Task ObterConversoesPorUsuarioAsync_Success()
     {
         // Arrange
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversoes = new List<Conversao>
             {
-                new Conversao(Guid.NewGuid(), usuarioId, DateTime.Now, Status.AguardandoConversao, "video.mp4", "urlVideo", "urlCompactado")
+                new(Guid.NewGuid(), usuarioId, DateTime.Now, Status.AguardandoConversao, "video.mp4", "urlVideo", "urlCompactado")
             };
         _conversaoUseCaseMock.Setup(x => x.ObterConversoesPorUsuarioAsync(usuarioId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(conversoes);
@@ -86,7 +88,7 @@ public class ConversaoControllerTests
     public async Task ObterConversoesPorUsuarioAsync_NoConversoes()
     {
         // Arrange
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         _conversaoUseCaseMock.Setup(x => x.ObterConversoesPorUsuarioAsync(usuarioId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((List<Conversao>?)null);
 
@@ -102,7 +104,7 @@ public class ConversaoControllerTests
     public async Task EfetuarDownloadAsync_Success()
     {
         // Arrange
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
         var arquivo = new Arquivo(new byte[] { 1, 2, 3 }, "video.mp4");
         _conversaoUseCaseMock.Setup(x => x.EfetuarDownloadAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>()))
@@ -121,7 +123,7 @@ public class ConversaoControllerTests
     public async Task EfetuarDownloadAsync_Failure()
     {
         // Arrange
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
         _conversaoUseCaseMock.Setup(x => x.EfetuarDownloadAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Arquivo?)null);

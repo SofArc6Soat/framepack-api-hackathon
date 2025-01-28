@@ -10,7 +10,6 @@ public class UploadRequestDtoValidator : AbstractValidator<UploadRequestDto>
 {
     public UploadRequestDtoValidator()
     {
-        RuleFor(x => x.UsuarioId).NotEmpty().WithMessage("O campo {0} é obrigatório.");
         RuleFor(x => x.NomeArquivo)
             .NotEmpty().WithMessage("O campo {0} é obrigatório.")
             .Length(5, 50).WithMessage("O campo {0} deve conter entre {2} e {1} caracteres.");
@@ -55,13 +54,11 @@ public class UploadRequestDtoTests
     {
         var dto = new UploadRequestDto
         {
-            UsuarioId = Guid.Empty,
             NomeArquivo = "validname.mp4",
             ArquivoVideo = CreateMockFile("video.mp4", 100 * 1024 * 1024)
         };
 
         var result = _validator.TestValidate(dto);
-        result.ShouldHaveValidationErrorFor(x => x.UsuarioId);
     }
 
     [Fact]
@@ -69,7 +66,6 @@ public class UploadRequestDtoTests
     {
         var dto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = string.Empty,
             ArquivoVideo = CreateMockFile("video.mp4", 100 * 1024 * 1024)
         };
@@ -83,7 +79,6 @@ public class UploadRequestDtoTests
     {
         var dto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "abc",
             ArquivoVideo = CreateMockFile("video.mp4", 100 * 1024 * 1024)
         };
@@ -97,7 +92,6 @@ public class UploadRequestDtoTests
     {
         var dto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = new string('a', 51),
             ArquivoVideo = CreateMockFile("video.mp4", 100 * 1024 * 1024)
         };
@@ -111,7 +105,6 @@ public class UploadRequestDtoTests
     {
         var dto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "validname.mp4",
             ArquivoVideo = null
         };
@@ -125,7 +118,6 @@ public class UploadRequestDtoTests
     {
         var dto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "validname.mp4",
             ArquivoVideo = CreateMockFile("video.txt", 100 * 1024 * 1024)
         };
@@ -139,7 +131,6 @@ public class UploadRequestDtoTests
     {
         var dto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "validname.mp4",
             ArquivoVideo = CreateMockFile("video.mp4", 600 * 1024 * 1024)
         };
@@ -153,7 +144,6 @@ public class UploadRequestDtoTests
     {
         var dto = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "validname.mp4",
             ArquivoVideo = CreateMockFile("video.mp4", 100 * 1024 * 1024)
         };

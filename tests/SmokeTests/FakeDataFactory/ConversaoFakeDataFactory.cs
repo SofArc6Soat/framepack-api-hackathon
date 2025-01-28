@@ -14,7 +14,6 @@ public static class ConversaoFakeDataFactory
 
         return new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "video.mp4",
             ArquivoVideo = formFile.Object
         };
@@ -28,7 +27,6 @@ public static class ConversaoFakeDataFactory
 
         return new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "video.txt",
             ArquivoVideo = formFile.Object
         };

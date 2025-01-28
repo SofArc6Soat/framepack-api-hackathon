@@ -1,6 +1,7 @@
 ﻿using Api.Controllers;
 using Controllers;
 using Core.Domain.Notificacoes;
+using Core.WebApi.Configurations;
 using Core.WebApi.Controller;
 using Domain.Entities;
 using Gateways.Dtos.Request;
@@ -15,13 +16,15 @@ public class ConversoesApiControllerTests
 {
     private readonly Mock<IConversaoController> _conversaoControllerMock;
     private readonly Mock<INotificador> _notificadorMock;
+    private readonly Mock<IUserContextService> _userContextServiceMock;
     private readonly ConversoesApiController _controller;
 
     public ConversoesApiControllerTests()
     {
         _conversaoControllerMock = new Mock<IConversaoController>();
         _notificadorMock = new Mock<INotificador>();
-        _controller = new ConversoesApiController(_conversaoControllerMock.Object, _notificadorMock.Object);
+        _userContextServiceMock = new Mock<IUserContextService>();
+        _controller = new ConversoesApiController(_conversaoControllerMock.Object, _notificadorMock.Object, _userContextServiceMock.Object);
     }
 
     [Fact]
@@ -31,7 +34,6 @@ public class ConversoesApiControllerTests
         _controller.ModelState.AddModelError("NomeArquivo", "Required");
         var request = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "video.mp4",
             ArquivoVideo = Mock.Of<IFormFile>()
         };
@@ -50,6 +52,7 @@ public class ConversoesApiControllerTests
     {
         // Arrange
         var mockFile = new Mock<IFormFile>();
+        var usuarioId = "id-do-usuario";
         var content = "Hello World from a Fake File";
         var fileName = "video.mp4";
         var ms = new MemoryStream();
@@ -63,12 +66,11 @@ public class ConversoesApiControllerTests
 
         var request = new UploadRequestDto
         {
-            UsuarioId = Guid.NewGuid(),
             NomeArquivo = "video.mp4",
             ArquivoVideo = mockFile.Object
         };
 
-        _conversaoControllerMock.Setup(x => x.EfetuarUploadAsync(request, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _conversaoControllerMock.Setup(x => x.EfetuarUploadAsync(request, usuarioId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         // Act
         var result = await _controller.EfetuarUploadAsync(request, CancellationToken.None);
@@ -83,11 +85,10 @@ public class ConversoesApiControllerTests
     public async Task ObterConversoesPorUsuarioAsync_Success_ReturnsCustomResponseGet()
     {
         // Arrange
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversoes = new List<ObterCoversoesResult>
             {
-                new ObterCoversoesResult
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Data = DateTime.Now,
                     Status = "Completed",
@@ -98,7 +99,7 @@ public class ConversoesApiControllerTests
         _conversaoControllerMock.Setup(x => x.ObterConversoesPorUsuarioAsync(usuarioId, It.IsAny<CancellationToken>())).ReturnsAsync(conversoes);
 
         // Act
-        var result = await _controller.ObterConversoesPorUsuarioAsync(usuarioId, CancellationToken.None);
+        var result = await _controller.ObterConversoesPorUsuarioAsync(CancellationToken.None);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -111,13 +112,13 @@ public class ConversoesApiControllerTests
     public async Task EfetuarDownloadAsync_Success_ReturnsFile()
     {
         // Arrange
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
         var arquivo = new Arquivo(new byte[] { 1, 2, 3 }, "video.zip");
         _conversaoControllerMock.Setup(x => x.EfetuarDownloadAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync(arquivo);
 
         // Act
-        var result = await _controller.EfetuarDownloadAsync(usuarioId, conversaoId, CancellationToken.None);
+        var result = await _controller.EfetuarDownloadAsync(conversaoId, CancellationToken.None);
 
         // Assert
         var fileResult = Assert.IsType<FileContentResult>(result);
@@ -129,12 +130,12 @@ public class ConversoesApiControllerTests
     public async Task EfetuarDownloadAsync_NotFound_ReturnsNotFound()
     {
         // Arrange
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
         _conversaoControllerMock.Setup(x => x.EfetuarDownloadAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync((Arquivo)null);
 
         // Act
-        var result = await _controller.EfetuarDownloadAsync(usuarioId, conversaoId, CancellationToken.None);
+        var result = await _controller.EfetuarDownloadAsync(conversaoId, CancellationToken.None);
 
         // Assert
         Assert.IsType<NotFoundResult>(result);

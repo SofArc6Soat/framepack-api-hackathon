@@ -6,9 +6,6 @@ namespace Gateways.Dtos.Request
 {
     public record UploadRequestDto
     {
-        [RequiredGuid(ErrorMessage = "O campo {0} é obrigatório.")]
-        public Guid UsuarioId { get; set; }
-
         [Required(ErrorMessage = "O campo {0} é obrigatório.")]
         [StringLength(50, ErrorMessage = "O campo {0} deve conter entre {2} e {1} caracteres.", MinimumLength = 5)]
         [Display(Name = "Nome do Arquivo à ser salvo")]

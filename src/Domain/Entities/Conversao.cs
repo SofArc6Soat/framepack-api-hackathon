@@ -8,7 +8,7 @@ namespace Domain.Entities
 {
     public class Conversao : Entity, IAggregateRoot
     {
-        public Guid UsuarioId { get; private set; }
+        public string UsuarioId { get; private set; }
         public DateTime Data { get; private set; }
         public Status Status { get; private set; }
         public string NomeArquivo { get; private set; }
@@ -17,7 +17,7 @@ namespace Domain.Entities
         public string UrlArquivoVideo { get; private set; } = string.Empty;
         public string UrlArquivoCompactado { get; private set; } = string.Empty;
 
-        public Conversao(Guid id, Guid usuarioId, DateTime data, Status status, string nomeArquivo, IFormFile arquivoVideo)
+        public Conversao(Guid id, string usuarioId, DateTime data, Status status, string nomeArquivo, IFormFile arquivoVideo)
         {
             Id = id;
             UsuarioId = usuarioId;
@@ -27,7 +27,7 @@ namespace Domain.Entities
             ArquivoVideo = arquivoVideo;
         }
 
-        public Conversao(Guid id, Guid usuarioId, DateTime data, Status status, string nomeArquivo, string urlArquivoVideo, string urlArquivoCompactado)
+        public Conversao(Guid id, string usuarioId, DateTime data, Status status, string nomeArquivo, string urlArquivoVideo, string urlArquivoCompactado)
         {
             Id = id;
             UsuarioId = usuarioId;

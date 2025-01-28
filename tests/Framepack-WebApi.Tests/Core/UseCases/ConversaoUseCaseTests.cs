@@ -24,7 +24,8 @@ public class ConversaoUseCaseTests
     [Fact]
     public async Task EfetuarUploadAsync_Success()
     {
-        var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, Status.AguardandoConversao, "video.mp4", null);
+        var usuarioId = "id-do-usuario";
+        var conversao = new Conversao(Guid.NewGuid(), usuarioId, DateTime.Now, Status.AguardandoConversao, "video.mp4", null);
         _conversaoGatewayMock.Setup(g => g.EfetuarUploadAsync(conversao, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         var result = await _conversaoUseCase.EfetuarUploadAsync(conversao, CancellationToken.None);
@@ -36,7 +37,8 @@ public class ConversaoUseCaseTests
     [Fact]
     public async Task EfetuarUploadAsync_Failure()
     {
-        var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, Status.AguardandoConversao, "video.mp4", null);
+        var usuarioId = "id-do-usuario";
+        var conversao = new Conversao(Guid.NewGuid(), usuarioId, DateTime.Now, Status.AguardandoConversao, "video.mp4", null);
         _conversaoGatewayMock.Setup(g => g.EfetuarUploadAsync(conversao, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         var result = await _conversaoUseCase.EfetuarUploadAsync(conversao, CancellationToken.None);
@@ -48,8 +50,8 @@ public class ConversaoUseCaseTests
     [Fact]
     public async Task ObterConversoesPorUsuarioAsync_Success()
     {
-        var usuarioId = Guid.NewGuid();
-        var conversoes = new List<Conversao> { new Conversao(Guid.NewGuid(), usuarioId, DateTime.Now, Status.Concluido, "video.mp4", null) };
+        var usuarioId = "id-do-usuario";
+        var conversoes = new List<Conversao> { new(Guid.NewGuid(), usuarioId, DateTime.Now, Status.Concluido, "video.mp4", null) };
         _conversaoGatewayMock.Setup(g => g.ObterConversoesPorUsuarioAsync(usuarioId, It.IsAny<CancellationToken>())).ReturnsAsync(conversoes);
 
         var result = await _conversaoUseCase.ObterConversoesPorUsuarioAsync(usuarioId, CancellationToken.None);
@@ -61,7 +63,7 @@ public class ConversaoUseCaseTests
     [Fact]
     public async Task EfetuarDownloadAsync_Success()
     {
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
         var conversao = new Conversao(conversaoId, usuarioId, DateTime.Now, Status.Concluido, "video.mp4", "urlVideo", "urlCompactado");
         var arquivo = new Arquivo(new byte[] { 1, 2, 3 }, "video.mp4");
@@ -78,7 +80,7 @@ public class ConversaoUseCaseTests
     [Fact]
     public async Task EfetuarDownloadAsync_ConversaoInexistente()
     {
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
 
         _conversaoGatewayMock.Setup(g => g.ObterConversaoAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync((Conversao)null);
@@ -92,7 +94,7 @@ public class ConversaoUseCaseTests
     [Fact]
     public async Task EfetuarDownloadAsync_ArquivoCompactadoNaoDisponivel()
     {
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
         var conversao = new Conversao(conversaoId, usuarioId, DateTime.Now, Status.Concluido, "video.mp4", "urlVideo", null);
 
@@ -107,7 +109,7 @@ public class ConversaoUseCaseTests
     [Fact]
     public async Task EfetuarDownloadAsync_FalhaNoDownload()
     {
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
         var conversao = new Conversao(conversaoId, usuarioId, DateTime.Now, Status.Concluido, "video.mp4", "urlVideo", "urlCompactado");
 

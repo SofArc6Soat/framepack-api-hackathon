@@ -12,7 +12,7 @@ public class ConversaoDbTests
 
         // Assert
         Assert.Equal(Guid.Empty, conversaoDb.Id);
-        Assert.Equal(Guid.Empty, conversaoDb.UsuarioId);
+        Assert.Equal(string.Empty, conversaoDb.UsuarioId);
         Assert.Equal(string.Empty, conversaoDb.Status);
         Assert.Equal(default(DateTime), conversaoDb.Data);
         Assert.Equal(string.Empty, conversaoDb.UrlArquivoVideo);
@@ -24,7 +24,7 @@ public class ConversaoDbTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var status = "Completed";
         var data = DateTime.UtcNow;
         var urlArquivoVideo = "http://example.com/video.mp4";
