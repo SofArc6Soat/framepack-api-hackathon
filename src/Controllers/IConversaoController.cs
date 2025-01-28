@@ -6,9 +6,9 @@ namespace Controllers
 {
     public interface IConversaoController
     {
-        Task<bool> EfetuarUploadAsync(UploadRequestDto uploadRequestDto, CancellationToken cancellationToken);
-        Task<List<ObterCoversoesResult>?> ObterConversoesPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken);
-        Task<Arquivo?> EfetuarDownloadAsync(Guid usuarioId, Guid conversaoId, CancellationToken cancellationToken);
+        Task<bool> EfetuarUploadAsync(UploadRequestDto uploadRequestDto, string usuarioId, CancellationToken cancellationToken);
+        Task<List<ObterCoversoesResult>?> ObterConversoesPorUsuarioAsync(string usuarioId, CancellationToken cancellationToken);
+        Task<Arquivo?> EfetuarDownloadAsync(string usuarioId, Guid conversaoId, CancellationToken cancellationToken);
 
     }
 }

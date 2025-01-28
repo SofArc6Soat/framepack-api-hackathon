@@ -7,11 +7,14 @@ public class ConversaoSolicitadaEventTests
     [Fact]
     public void ConversaoSolicitadaEvent_ShouldInitializeWithDefaultValues()
     {
+        // Arrange
+        var usuarioId = "id-do-usuario";
+
         // Act
         var evento = new ConversaoSolicitadaEvent();
 
         // Assert
-        Assert.Equal(Guid.Empty, evento.UsuarioId);
+        Assert.Equal(usuarioId, evento.UsuarioId);
         Assert.Equal(default(DateTime), evento.Data);
         Assert.Equal(string.Empty, evento.Status);
         Assert.Equal(string.Empty, evento.NomeArquivo);
@@ -22,7 +25,7 @@ public class ConversaoSolicitadaEventTests
     public void ConversaoSolicitadaEvent_ShouldSetPropertiesCorrectly()
     {
         // Arrange
-        var usuarioId = Guid.NewGuid();
+        var usuarioId = "id-do-usuario";
         var data = DateTime.UtcNow;
         var status = "Iniciado";
         var nomeArquivo = "video.mp4";

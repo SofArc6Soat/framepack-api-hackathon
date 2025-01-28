@@ -31,7 +31,8 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
         public async Task EfetuarUploadAsync_Success()
         {
             // Arrange
-            var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", null);
+            var usuarioId = "id-do-usuario";
+            var conversao = new Conversao(Guid.NewGuid(), usuarioId, DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", null);
             _s3ServiceMock.Setup(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo)).ReturnsAsync("http://s3.com/video.mp4");
             _repositoryMock.Setup(r => r.SaveAsync(It.IsAny<ConversaoDb>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
             _sqsServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>())).ReturnsAsync(true);
@@ -50,7 +51,8 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
         public async Task EfetuarUploadAsync_Failure_UploadError()
         {
             // Arrange
-            var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", null);
+            var usuarioId = "id-do-usuario";
+            var conversao = new Conversao(Guid.NewGuid(), usuarioId, DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", null);
             _s3ServiceMock.Setup(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo)).ReturnsAsync(string.Empty);
 
             // Act
@@ -67,10 +69,10 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
         public async Task ObterConversoesPorUsuarioAsync_Success()
         {
             // Arrange
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var conversaoDbList = new List<ConversaoDb>
                 {
-                    new ConversaoDb { Id = Guid.NewGuid(), UsuarioId = usuarioId, Status = "AguardandoConversao", Data = DateTime.UtcNow, NomeArquivo = "video.mp4", UrlArquivoVideo = "http://s3.com/video.mp4" }
+                    new() { Id = Guid.NewGuid(), UsuarioId = usuarioId, Status = "AguardandoConversao", Data = DateTime.UtcNow, NomeArquivo = "video.mp4", UrlArquivoVideo = "http://s3.com/video.mp4" }
                 };
             var asyncSearchMock = new Mock<AsyncSearch<ConversaoDb>>();
             asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync(conversaoDbList);
@@ -89,9 +91,9 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
         public async Task ObterConversoesPorUsuarioAsync_EmptyResult()
         {
             // Arrange
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var asyncSearchMock = new Mock<AsyncSearch<ConversaoDb>>();
-            asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<ConversaoDb>());
+            asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
             _repositoryMock.Setup(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>())).Returns(asyncSearchMock.Object);
 
             // Act
@@ -106,7 +108,8 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
         public async Task EfetuarDownloadAsync_Failure()
         {
             // Arrange
-            var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, Status.Concluido, "video.mp4", "http://s3.com/video.mp4", "http://s3.com/video.zip");
+            var usuarioId = "id-do-usuario";
+            var conversao = new Conversao(Guid.NewGuid(), usuarioId, DateTime.UtcNow, Status.Concluido, "video.mp4", "http://s3.com/video.mp4", "http://s3.com/video.zip");
             _s3ServiceMock.Setup(s => s.GerarPreSignedUrl(conversao.UrlArquivoCompactado, It.IsAny<int>())).Returns("http://s3.com/video.zip");
             var responseMessage = new HttpResponseMessage(HttpStatusCode.NotFound);
             var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
@@ -124,11 +127,11 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
         public async Task ObterConversaoAsync_Success()
         {
             // Arrange
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var conversaoId = Guid.NewGuid();
             var conversaoDbList = new List<ConversaoDb>
                 {
-                    new ConversaoDb { Id = conversaoId, UsuarioId = usuarioId, Status = "AguardandoConversao", Data = DateTime.UtcNow, NomeArquivo = "video.mp4", UrlArquivoVideo = "http://s3.com/video.mp4" }
+                    new() { Id = conversaoId, UsuarioId = usuarioId, Status = "AguardandoConversao", Data = DateTime.UtcNow, NomeArquivo = "video.mp4", UrlArquivoVideo = "http://s3.com/video.mp4" }
                 };
             var asyncSearchMock = new Mock<AsyncSearch<ConversaoDb>>();
             asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync(conversaoDbList);
@@ -147,10 +150,10 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
         public async Task ObterConversaoAsync_NotFound()
         {
             // Arrange
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var conversaoId = Guid.NewGuid();
             var asyncSearchMock = new Mock<AsyncSearch<ConversaoDb>>();
-            asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<ConversaoDb>());
+            asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
             _repositoryMock.Setup(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>())).Returns(asyncSearchMock.Object);
 
             // Act

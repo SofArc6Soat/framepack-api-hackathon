@@ -38,7 +38,7 @@ namespace Gateways
             return await sqsService.SendMessageAsync(GerarConversaoSolicitadaEvent(conversaoDto));
         }
 
-        public async Task<List<Conversao>?> ObterConversoesPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken)
+        public async Task<List<Conversao>?> ObterConversoesPorUsuarioAsync(string usuarioId, CancellationToken cancellationToken)
         {
             var conditions = new List<ScanCondition>
                 {
@@ -68,7 +68,7 @@ namespace Gateways
             return arquivoBytes is null ? null : new Arquivo(arquivoBytes, string.Concat(conversao.NomeArquivo, ".zip"));
         }
 
-        public async Task<Conversao?> ObterConversaoAsync(Guid usuarioId, Guid conversaoId, CancellationToken cancellationToken)
+        public async Task<Conversao?> ObterConversaoAsync(string usuarioId, Guid conversaoId, CancellationToken cancellationToken)
         {
             var conditions = new List<ScanCondition>
                 {

@@ -20,10 +20,10 @@ namespace UseCases
             return false;
         }
 
-        public async Task<List<Conversao>?> ObterConversoesPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken) =>
+        public async Task<List<Conversao>?> ObterConversoesPorUsuarioAsync(string usuarioId, CancellationToken cancellationToken) =>
             await conversaoGateway.ObterConversoesPorUsuarioAsync(usuarioId, cancellationToken);
 
-        public async Task<Arquivo?> EfetuarDownloadAsync(Guid usuarioId, Guid conversaoId, CancellationToken cancellationToken)
+        public async Task<Arquivo?> EfetuarDownloadAsync(string usuarioId, Guid conversaoId, CancellationToken cancellationToken)
         {
             var conversao = await conversaoGateway.ObterConversaoAsync(usuarioId, conversaoId, cancellationToken);
 
