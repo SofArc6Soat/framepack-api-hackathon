@@ -96,6 +96,7 @@ public class ConversoesApiControllerTests
                     UrlArquivoCompactado = "url"
                 }
             };
+        _userContextServiceMock.Setup(x => x.UserId).Returns(usuarioId);
         _conversaoControllerMock.Setup(x => x.ObterConversoesPorUsuarioAsync(usuarioId, It.IsAny<CancellationToken>())).ReturnsAsync(conversoes);
 
         // Act
@@ -115,6 +116,7 @@ public class ConversoesApiControllerTests
         var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
         var arquivo = new Arquivo(new byte[] { 1, 2, 3 }, "video.zip");
+        _userContextServiceMock.Setup(x => x.UserId).Returns(usuarioId);
         _conversaoControllerMock.Setup(x => x.EfetuarDownloadAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync(arquivo);
 
         // Act
@@ -132,6 +134,7 @@ public class ConversoesApiControllerTests
         // Arrange
         var usuarioId = "id-do-usuario";
         var conversaoId = Guid.NewGuid();
+        _userContextServiceMock.Setup(x => x.UserId).Returns(usuarioId);
         _conversaoControllerMock.Setup(x => x.EfetuarDownloadAsync(usuarioId, conversaoId, It.IsAny<CancellationToken>())).ReturnsAsync((Arquivo)null);
 
         // Act

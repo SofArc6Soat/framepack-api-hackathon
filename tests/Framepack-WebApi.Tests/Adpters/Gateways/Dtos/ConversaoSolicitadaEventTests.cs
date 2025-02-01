@@ -7,14 +7,11 @@ public class ConversaoSolicitadaEventTests
     [Fact]
     public void ConversaoSolicitadaEvent_ShouldInitializeWithDefaultValues()
     {
-        // Arrange
-        var usuarioId = "id-do-usuario";
-
         // Act
         var evento = new ConversaoSolicitadaEvent();
 
         // Assert
-        Assert.Equal(usuarioId, evento.UsuarioId);
+        Assert.Equal(string.Empty, evento.UsuarioId);
         Assert.Equal(default(DateTime), evento.Data);
         Assert.Equal(string.Empty, evento.Status);
         Assert.Equal(string.Empty, evento.NomeArquivo);
