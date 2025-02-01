@@ -75,7 +75,7 @@ namespace Framepack_WebApi.Tests.Core.Domain.Entities
         {
             // Arrange
             var id = Guid.NewGuid();
-            var usuarioId = "id-do-usuario";
+            var usuarioId = string.Empty; // UsuarioId inválido
             var data = DateTime.Now;
             var status = Status.AguardandoConversao;
             var nomeArquivo = "video.mp4";
