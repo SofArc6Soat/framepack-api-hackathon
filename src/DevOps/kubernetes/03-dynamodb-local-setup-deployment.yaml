@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamodb-local-setup
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dynamodb-local-setup
+  template:
+    metadata:
+      labels:
+        app: dynamodb-local-setup
+    spec:
+      containers:
+      - name: dynamodb-local-setup
+        image: amazon/aws-cli
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          value: ''
+        - name: AWS_SECRET_ACCESS_KEY
+          value: ''
+        - name: AWS_REGION
+          value: ''
+        volumeMounts:
+        - name: dynamodb-schemas
+          mountPath: /tmp/dynamo
+      volumes:
+      - name: dynamodb-schemas
+        hostPath:
+          path: /home/dynamodblocal/data
+          type: Directory

@@ -90,27 +90,84 @@ docker-compose up --build
 
 ### Executar com Kubernetes
 2. Kubernetes
-2.1. Navegue até o diretório do projeto:
-```
-cd framepack-api-hackathon\src\DevOps\kubernetes
-```
-2.2. Configure o ambiente Docker:
-```
-kubectl apply -f 06-framepack-api-deployment.yaml
-kubectl apply -f 07-framepack-api-service.yaml
-kubectl apply -f 08-framepack-api-hpa.yaml
-kubectl port-forward svc/framepack-api 8080:80
-```
-ou executar todos scripts via PowerShell
-```
-Get-ExecutionPolicy
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
-.\delete-k8s-resources.ps1
-.\apply-k8s-resources.ps1
-```
-2.3. A aplicação estará disponível em http://localhost:8080
-2.4. URL do Swagger: http://localhost:8080/swagger
-2.5. URL do Healthcheck da API: http://localhost:8080/health
+
+Para executar o projeto com Kubernetes, siga os passos abaixo:
+
+**Crie um arquivo `.env`** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
+
+  ```plaintext
+  AWS_ACCESS_KEY_ID=your_access_key_id
+  AWS_SECRET_ACCESS_KEY=your_secret_access_key
+  AWS_REGION=your_region
+  ```
+
+**Navegue até o diretório do projeto**:
+
+  ```
+  cd framepack-api-hackathon\src\DevOps\kubernetes
+  ```
+  
+**Crie um Secret no Kubernetes** a partir do arquivo [.env]:
+
+  ```sh
+  kubectl create secret generic aws-secret --from-env-file=framepack-api-hackathon/.env
+  ```
+
+**Aplique os arquivos YAML** para configurar os recursos do Kubernetes:
+
+  ```sh
+  kubectl apply -f 01-dynamodb-local-deployment.yaml
+  kubectl apply -f 02-dynamodb-local-service.yaml
+  kubectl apply -f 03-dynamodb-local-setup-deployment.yaml
+  kubectl apply -f 04-framepack-worker-deployment.yaml
+  kubectl apply -f 05-framepack-worker-hpa.yaml
+  kubectl apply -f 06-framepack-worker-service.yaml
+  kubectl apply -f 07-framepack-api-deployment.yaml
+  kubectl apply -f 08-framepack-api-service.yaml
+  kubectl apply -f 09-framepack-api-hpa.yaml
+  ```
+
+**Aguarde até que os pods da API e do Worker estejam em execução**:
+
+  ```sh
+  kubectl get pods -l app=framepack-api
+  kubectl get pods -l app=framepack-worker
+  ```
+
+**Configure o port-forwarding** para os serviços da API e do Worker:
+
+  ```sh
+  kubectl port-forward svc/framepack-api-service 8080:80
+  kubectl port-forward svc/framepack-worker-service 8081:80
+  ```
+
+### Usando o Script PowerShell
+
+Se preferir, você pode executar o script PowerShell que automatiza todos os passos acima:
+
+**Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
+
+  ```plaintext
+  AWS_ACCESS_KEY_ID=your_access_key_id
+  AWS_SECRET_ACCESS_KEY=your_secret_access_key
+  AWS_REGION=your_region
+  ```
+**Execute o script PowerShell** para criar o Secret e aplicar os recursos do Kubernetes:
+
+  ```powershell
+  Get-ExecutionPolicy
+  Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+  .\delete-k8s-resources.ps1
+  .\apply-k8s-resources.ps1
+  ```
+Este script irá:
+
+- Criar um Secret no Kubernetes a partir do arquivo [.env].
+- Aplicar todos os arquivos YAML necessários para configurar os recursos do Kubernetes.
+- Aguardar até que os pods da API e do Worker estejam em execução.
+- Configurar o port-forwarding para os serviços da API e do Worker.
+
+Certifique-se de ter o `kubectl` instalado e configurado corretamente em sua máquina antes de executar o script.
 
 ## Collection com todas as APIs com exemplos de requisição
 1. Caso deseje testar via postman com dados fake importe o arquivo...
