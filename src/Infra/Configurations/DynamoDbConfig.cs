@@ -4,76 +4,76 @@ using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infra.Configurations;
-
-public static class DynamoDbConfig
+namespace Infra.Configurations
 {
-
-    public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey, IAmazonDynamoDB? dynamoDbClient = null, IDynamoDBContext dynamoDbContext = null)
+    public static class DynamoDbConfig
     {
-        var clientDynamo = dynamoDbClient ?? ConfigDynamoDb(serviceUrl, accessKey, secretKey);
-        var context = dynamoDbContext ?? new DynamoDBContext(clientDynamo);
-
-        services.AddSingleton<IAmazonDynamoDB>(clientDynamo);
-        services.AddSingleton<IDynamoDBContext>(context);
-
-        CreateTableIfNotExists(clientDynamo).Wait();
-    }
-
-    private static AmazonDynamoDBClient ConfigDynamoDb(string serviceUrl, string accessKey, string secretKey)
-    {
-        var config = new AmazonDynamoDBConfig
+        public static void Configure(IServiceCollection services, string serviceUrl, string accessKey, string secretKey, IAmazonDynamoDB dynamoDbClient = null, IDynamoDBContext dynamoDbContext = null)
         {
-            ServiceURL = serviceUrl
-        };
+            var clientDynamo = dynamoDbClient ?? ConfigDynamoDb(serviceUrl, accessKey, secretKey);
+            var context = dynamoDbContext ?? new DynamoDBContext(clientDynamo);
 
-        var credentials = new BasicAWSCredentials(accessKey, secretKey);
-        var amazonDynamoDbClient = new AmazonDynamoDBClient(credentials, config);
+            services.AddSingleton<IAmazonDynamoDB>(clientDynamo);
+            services.AddSingleton<IDynamoDBContext>(context);
 
-        return amazonDynamoDbClient;
-    }
+            CreateTableIfNotExists(clientDynamo).Wait();
+        }
 
-    public static async Task CreateTableIfNotExists(IAmazonDynamoDB client)
-    {
-        var listTable = new List<string>
+        private static AmazonDynamoDBClient ConfigDynamoDb(string serviceUrl, string accessKey, string secretKey)
+        {
+            var config = new AmazonDynamoDBConfig
+            {
+                ServiceURL = serviceUrl
+            };
+
+            var credentials = new BasicAWSCredentials(accessKey, secretKey);
+            var amazonDynamoDbClient = new AmazonDynamoDBClient(credentials, config);
+
+            return amazonDynamoDbClient;
+        }
+
+        public static async Task CreateTableIfNotExists(IAmazonDynamoDB client)
+        {
+            var listTable = new List<string>
+                        {
+                            "Conversoes"
+                        };
+
+            foreach (var tableName in listTable)
+            {
+                try
+                {
+                    await client.DescribeTableAsync(tableName);
+                }
+                catch (ResourceNotFoundException)
+                {
+                    var createTableRequest = new CreateTableRequest
                     {
-                        "Conversoes"
+                        TableName = tableName,
+                        AttributeDefinitions =
+                                    {
+                                        new AttributeDefinition("Id", ScalarAttributeType.S)
+                                    },
+                        KeySchema =
+                                    {
+                                        new KeySchemaElement("Id", KeyType.HASH)
+                                    },
+                        ProvisionedThroughput = new ProvisionedThroughput
+                        {
+                            ReadCapacityUnits = 5,
+                            WriteCapacityUnits = 5
+                        }
                     };
 
-        foreach (var tableName in listTable)
-        {
-            try
-            {
-                await client.DescribeTableAsync(tableName);
-            }
-            catch (ResourceNotFoundException)
-            {
-                var createTableRequest = new CreateTableRequest
-                {
-                    TableName = tableName,
-                    AttributeDefinitions =
-                                {
-                                    new AttributeDefinition("Id", ScalarAttributeType.S)
-                                },
-                    KeySchema =
-                                {
-                                    new KeySchemaElement("Id", KeyType.HASH)
-                                },
-                    ProvisionedThroughput = new ProvisionedThroughput
+                    await client.CreateTableAsync(createTableRequest);
+
+                    var tableStatus = "CREATING";
+                    while (tableStatus == "CREATING")
                     {
-                        ReadCapacityUnits = 5,
-                        WriteCapacityUnits = 5
+                        await Task.Delay(1000);
+                        var response = await client.DescribeTableAsync(tableName);
+                        tableStatus = response.Table.TableStatus;
                     }
-                };
-
-                await client.CreateTableAsync(createTableRequest);
-
-                var tableStatus = "CREATING";
-                while (tableStatus == "CREATING")
-                {
-                    await Task.Delay(1000);
-                    var response = await client.DescribeTableAsync(tableName);
-                    tableStatus = response.Table.TableStatus;
                 }
             }
         }

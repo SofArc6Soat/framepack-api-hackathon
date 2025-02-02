@@ -5,15 +5,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace Core.Infra.S3;
 
-public class S3Service : IS3Service
+public class S3Service(IAmazonS3 s3Client) : IS3Service
 {
     private const string BucketName = "amzn-s3-bucket-26bda3ac-c185-4185-a9f8-d3697a89754c-framepack";
-    private readonly IAmazonS3 _s3Client;
-
-    public S3Service(IAmazonS3 s3Client)
-    {
-        _s3Client = s3Client;
-    }
 
     public async Task<string> UploadArquivoAsync(Guid id, IFormFile arquivo)
     {
@@ -32,11 +26,11 @@ public class S3Service : IS3Service
                 ContentType = arquivo.ContentType
             };
 
-            var transferUtility = new TransferUtility(_s3Client);
+            var transferUtility = new TransferUtility(s3Client);
             await transferUtility.UploadAsync(uploadRequest);
 
             var existente = await VerificarExistenciaArquivo(BucketName, key);
-            return !existente ? string.Empty : $"https://{BucketName}.s3.amazonaws.com/{key}";
+            return !existente ? string.Empty : key;
         }
         catch (AmazonS3Exception ex)
         {
@@ -58,11 +52,11 @@ public class S3Service : IS3Service
                 Key = key
             };
 
-            var transferUtility = new TransferUtility(_s3Client);
+            var transferUtility = new TransferUtility(s3Client);
             await transferUtility.UploadAsync(uploadRequest);
 
             var existente = await VerificarExistenciaArquivo(BucketName, key);
-            return !existente ? string.Empty : $"https://{BucketName}.s3.amazonaws.com/{key}";
+            return !existente ? string.Empty : key;
         }
         catch (AmazonS3Exception ex)
         {
@@ -79,7 +73,7 @@ public class S3Service : IS3Service
             Expires = DateTime.UtcNow.AddMinutes(duracaoMinutos)
         };
 
-        return _s3Client.GetPreSignedURL(request);
+        return s3Client.GetPreSignedURL(request);
     }
 
     public async Task DeletarArquivoAsync(string key)
@@ -92,7 +86,7 @@ public class S3Service : IS3Service
                 Key = key
             };
 
-            await _s3Client.DeleteObjectAsync(deleteObjectRequest);
+            await s3Client.DeleteObjectAsync(deleteObjectRequest);
             Console.WriteLine($"Arquivo deletado com sucesso.");
         }
         catch (AmazonS3Exception ex)
@@ -105,7 +99,7 @@ public class S3Service : IS3Service
     {
         try
         {
-            var response = await _s3Client.GetObjectMetadataAsync(bucketName, key);
+            var response = await s3Client.GetObjectMetadataAsync(bucketName, key);
             return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
         catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -47,13 +48,38 @@ public static class ServiceCollectionExtensions
                     ValidateIssuerSigningKey = true,
                     RoleClaimType = "cognito:groups"
                 };
+
+                opt.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        // Extrair o "sub" (ID do usuário)
+                        var userIdClaim = context.Principal?.FindFirst(ClaimTypes.NameIdentifier) ??
+                                          context.Principal?.FindFirst("sub");
+
+                        if (userIdClaim is not null)
+                        {
+                            var identity = context.Principal.Identity as ClaimsIdentity;
+                            identity?.AddClaim(new Claim("UserId", userIdClaim.Value));
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
         services.AddAuthorizationBuilder()
-            // Política para usuários no grupo "usuarios"
-            .AddPolicy("UsuarioRole", policy => policy.RequireRole("usuarios"));
+            .AddPolicy("UsuarioRole", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireRole("usuarios");
+            });
 
         services.AddAWSService<IAmazonCognitoIdentityProvider>();
+
+        services.AddScoped<IUserContextService, UserContextService>();
+
+        services.AddHttpContextAccessor();
     }
 
     public static void UseApiDefautConfig(this IApplicationBuilder app)

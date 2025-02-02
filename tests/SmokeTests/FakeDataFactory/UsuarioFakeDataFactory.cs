@@ -4,97 +4,67 @@ namespace SmokeTests.FakeDataFactory;
 
 public static class UsuarioFakeDataFactory
 {
-    public static UsuarioRequestDto CriarUsuarioValido()
+    public static UsuarioRequestDto CriarUsuarioValido() => new()
     {
-        return new UsuarioRequestDto
-        {
-            Id = Guid.NewGuid(),
-            Nome = "Usuário Válido",
-            Email = "usuario.valido@example.com",
-            Senha = "SenhaValida123"
-        };
-    }
+        Id = Guid.NewGuid(),
+        Nome = "Usuário Válido",
+        Email = "usuario.valido@example.com",
+        Senha = "SenhaValida123"
+    };
 
-    public static UsuarioRequestDto CriarUsuarioComEmailInvalido()
+    public static UsuarioRequestDto CriarUsuarioComEmailInvalido() => new()
     {
-        return new UsuarioRequestDto
-        {
-            Id = Guid.NewGuid(),
-            Nome = "Usuário Inválido",
-            Email = "email-invalido",
-            Senha = "SenhaValida123"
-        };
-    }
+        Id = Guid.NewGuid(),
+        Nome = "Usuário Inválido",
+        Email = "email-invalido",
+        Senha = "SenhaValida123"
+    };
 
-    public static IdentifiqueSeRequestDto CriarIdentifiqueSeRequestValido()
+    public static IdentifiqueSeRequestDto CriarIdentifiqueSeRequestValido() => new()
     {
-        return new IdentifiqueSeRequestDto
-        {
-            Email = "usuario.valido@example.com",
-            Senha = "SenhaValida123"
-        };
-    }
+        Email = "usuario.valido@example.com",
+        Senha = "SenhaValida123"
+    };
 
-    public static IdentifiqueSeRequestDto CriarIdentifiqueSeRequestInvalido()
+    public static IdentifiqueSeRequestDto CriarIdentifiqueSeRequestInvalido() => new()
     {
-        return new IdentifiqueSeRequestDto
-        {
-            Email = "email-invalido",
-            Senha = "SenhaInvalida"
-        };
-    }
+        Email = "email-invalido",
+        Senha = "SenhaInvalida"
+    };
 
-    public static ConfirmarEmailVerificacaoDto CriarConfirmarEmailVerificacaoDtoValido()
+    public static ConfirmarEmailVerificacaoDto CriarConfirmarEmailVerificacaoDtoValido() => new()
     {
-        return new ConfirmarEmailVerificacaoDto
-        {
-            Email = "usuario.valido@example.com",
-            CodigoVerificacao = "123456"
-        };
-    }
+        Email = "usuario.valido@example.com",
+        CodigoVerificacao = "123456"
+    };
 
-    public static ConfirmarEmailVerificacaoDto CriarConfirmarEmailVerificacaoDtoInvalido()
+    public static ConfirmarEmailVerificacaoDto CriarConfirmarEmailVerificacaoDtoInvalido() => new()
     {
-        return new ConfirmarEmailVerificacaoDto
-        {
-            Email = "email-invalido",
-            CodigoVerificacao = "123"
-        };
-    }
+        Email = "email-invalido",
+        CodigoVerificacao = "123"
+    };
 
-    public static SolicitarRecuperacaoSenhaDto CriarSolicitarRecuperacaoSenhaDtoValido()
+    public static SolicitarRecuperacaoSenhaDto CriarSolicitarRecuperacaoSenhaDtoValido() => new()
     {
-        return new SolicitarRecuperacaoSenhaDto
-        {
-            Email = "usuario.valido@example.com"
-        };
-    }
+        Email = "usuario.valido@example.com"
+    };
 
-    public static SolicitarRecuperacaoSenhaDto CriarSolicitarRecuperacaoSenhaDtoInvalido()
+    public static SolicitarRecuperacaoSenhaDto CriarSolicitarRecuperacaoSenhaDtoInvalido() => new()
     {
-        return new SolicitarRecuperacaoSenhaDto
-        {
-            Email = "email-invalido"
-        };
-    }
+        Email = "email-invalido"
+    };
 
-    public static ResetarSenhaDto CriarResetarSenhaDtoValido()
+    public static ResetarSenhaDto CriarResetarSenhaDtoValido() => new()
     {
-        return new ResetarSenhaDto
-        {
-            Email = "usuario.valido@example.com",
-            CodigoVerificacao = "123456",
-            NovaSenha = "NovaSenhaValida123"
-        };
-    }
+        Email = "usuario.valido@example.com",
+        CodigoVerificacao = "123456",
+        NovaSenha = "NovaSenhaValida123"
+    };
 
-    public static ResetarSenhaDto CriarResetarSenhaDtoInvalido()
+    public static ResetarSenhaDto CriarResetarSenhaDtoInvalido() => new()
     {
-        return new ResetarSenhaDto
-        {
-            Email = "email-invalido",
-            CodigoVerificacao = "123",
-            NovaSenha = "123"
-        };
-    }
+        Email = "email-invalido",
+        CodigoVerificacao = "123",
+        NovaSenha = "123"
+    };
 }

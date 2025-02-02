@@ -1,7 +1,4 @@
-﻿
-
-using Amazon.DynamoDBv2.DataModel;
-using Amazon.S3;
+﻿using Amazon.DynamoDBv2.DataModel;
 using Core.Infra.MessageBroker;
 using Core.Infra.S3;
 using Domain.Entities;
@@ -9,112 +6,164 @@ using Domain.ValueObjects;
 using Gateways;
 using Gateways.Dtos.Events;
 using Infra.Dto;
-using Microsoft.AspNetCore.Http;
 using Moq;
+using Moq.Protected;
+using System.Net;
 
-namespace Framepack_WebApi.Tests.Adpters.Gateways;
-public class ConversaoGatewayTests
+namespace Framepack_WebApi.Tests.Adpters.Gateways
 {
-    private readonly Mock<IDynamoDBContext> _repositoryMock;
-    private readonly Mock<ISqsService<ConversaoSolicitadaEvent>> _sqsServiceMock;
-    private readonly Mock<IS3Service> _s3ServiceMock;
-    private readonly IConversaoGateway _conversaoGateway;
-
-    public ConversaoGatewayTests()
+    public class ConversaoGatewayTests
     {
-        _repositoryMock = new Mock<IDynamoDBContext>();
-        _sqsServiceMock = new Mock<ISqsService<ConversaoSolicitadaEvent>>();
-        _s3ServiceMock = new Mock<IS3Service>();
-        _conversaoGateway = new ConversaoGateway(_repositoryMock.Object, _sqsServiceMock.Object, _s3ServiceMock.Object);
-    }
+        private readonly Mock<IDynamoDBContext> _repositoryMock;
+        private readonly Mock<ISqsService<ConversaoSolicitadaEvent>> _sqsServiceMock;
+        private readonly Mock<ISqsService<DownloadEfetuadoEvent>> _sqsDownloadServiceMock;
+        private readonly Mock<IS3Service> _s3ServiceMock;
+        private readonly ConversaoGateway _conversaoGateway;
 
-    [Fact]
-    public async Task EfetuarUploadAsync_Success()
-    {
-        // Arrange
-        var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", new Mock<IFormFile>().Object);
-        var cancellationToken = CancellationToken.None;
-        var urlArquivoVideo = "https://amzn-s3-bucket-26bda3ac-c185-4185-a9f8-d3697a89754c-framepack.s3.amazonaws.com/aguardando-processamento/video.mp4";
-        var preSignedUrl = "https://s3.amazonaws.com/bucket/video.mp4?signature=abc123";
+        public ConversaoGatewayTests()
+        {
+            _repositoryMock = new Mock<IDynamoDBContext>();
+            _sqsServiceMock = new Mock<ISqsService<ConversaoSolicitadaEvent>>();
+            _sqsDownloadServiceMock = new Mock<ISqsService<DownloadEfetuadoEvent>>();
+            _s3ServiceMock = new Mock<IS3Service>();
+            _conversaoGateway = new ConversaoGateway(_repositoryMock.Object, _sqsServiceMock.Object, _sqsDownloadServiceMock.Object, _s3ServiceMock.Object);
+        }
 
-        _s3ServiceMock.Setup(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo)).ReturnsAsync(urlArquivoVideo);
-        _s3ServiceMock.Setup(s => s.GerarPreSignedUrl(urlArquivoVideo, 120)).Returns(preSignedUrl);
-        _repositoryMock.Setup(r => r.SaveAsync(It.IsAny<ConversaoDb>(), cancellationToken)).Returns(Task.CompletedTask);
-        _sqsServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>())).ReturnsAsync(true);
+        [Fact]
+        public async Task EfetuarUploadAsync_Success()
+        {
+            // Arrange
+            var usuarioId = "id-do-usuario";
+            var conversao = new Conversao(Guid.NewGuid(), usuarioId, DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", null);
+            _s3ServiceMock.Setup(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo)).ReturnsAsync("http://s3.com/video.mp4");
+            _repositoryMock.Setup(r => r.SaveAsync(It.IsAny<ConversaoDb>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            _sqsServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>())).ReturnsAsync(true);
 
-        // Act
-        var result = await _conversaoGateway.EfetuarUploadAsync(conversao, cancellationToken);
+            // Act
+            var result = await _conversaoGateway.EfetuarUploadAsync(conversao, CancellationToken.None);
 
-        // Assert
-        Assert.True(result);
-        _s3ServiceMock.Verify(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo), Times.Once);
-        _s3ServiceMock.Verify(s => s.GerarPreSignedUrl(urlArquivoVideo, 120), Times.Once);
-        _repositoryMock.Verify(r => r.SaveAsync(It.IsAny<ConversaoDb>(), cancellationToken), Times.Once);
-        _sqsServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>()), Times.Once);
-    }
+            // Assert
+            Assert.True(result);
+            _s3ServiceMock.Verify(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo), Times.Once);
+            _repositoryMock.Verify(r => r.SaveAsync(It.IsAny<ConversaoDb>(), It.IsAny<CancellationToken>()));
+            _sqsServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>()));
+        }
 
-    [Fact]
-    public async Task EfetuarUploadAsync_Failure_PreSignedUrlIsEmpty()
-    {
-        // Arrange
-        var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", new Mock<IFormFile>().Object);
-        var cancellationToken = CancellationToken.None;
-        var urlArquivoVideo = "https://amzn-s3-bucket-26bda3ac-c185-4185-a9f8-d3697a89754c-framepack.s3.amazonaws.com/aguardando-processamento/video.mp4";
-        var preSignedUrl = string.Empty;
+        [Fact]
+        public async Task EfetuarUploadAsync_Failure_UploadError()
+        {
+            // Arrange
+            var usuarioId = "id-do-usuario";
+            var conversao = new Conversao(Guid.NewGuid(), usuarioId, DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", null);
+            _s3ServiceMock.Setup(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo)).ReturnsAsync(string.Empty);
 
-        _s3ServiceMock.Setup(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo)).ReturnsAsync(urlArquivoVideo);
-        _s3ServiceMock.Setup(s => s.GerarPreSignedUrl(urlArquivoVideo, 120)).Returns(preSignedUrl);
+            // Act
+            var result = await _conversaoGateway.EfetuarUploadAsync(conversao, CancellationToken.None);
 
-        // Act
-        var result = await _conversaoGateway.EfetuarUploadAsync(conversao, cancellationToken);
+            // Assert
+            Assert.False(result);
+            _s3ServiceMock.Verify(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo), Times.Once);
+            _repositoryMock.Verify(r => r.SaveAsync(It.IsAny<ConversaoDb>(), It.IsAny<CancellationToken>()), Times.Never);
+            _sqsServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>()), Times.Never);
+        }
 
-        // Assert
-        Assert.False(result);
-        _s3ServiceMock.Verify(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo), Times.Once);
-        _s3ServiceMock.Verify(s => s.GerarPreSignedUrl(urlArquivoVideo, 120), Times.Once);
-        _repositoryMock.Verify(r => r.SaveAsync(It.IsAny<ConversaoDb>(), cancellationToken), Times.Never);
-        _sqsServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>()), Times.Never);
-    }
+        [Fact]
+        public async Task ObterConversoesPorUsuarioAsync_Success()
+        {
+            // Arrange
+            var usuarioId = "id-do-usuario";
+            var conversaoDbList = new List<ConversaoDb>
+                {
+                    new() { Id = Guid.NewGuid(), UsuarioId = usuarioId, Status = "AguardandoConversao", Data = DateTime.UtcNow, NomeArquivo = "video.mp4", UrlArquivoVideo = "http://s3.com/video.mp4" }
+                };
+            var asyncSearchMock = new Mock<AsyncSearch<ConversaoDb>>();
+            asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync(conversaoDbList);
+            _repositoryMock.Setup(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>())).Returns(asyncSearchMock.Object);
 
-    [Fact]
-    public async Task EfetuarUploadAsync_Failure_UploadArquivoAsyncThrowsException()
-    {
-        // Arrange
-        var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", new Mock<IFormFile>().Object);
-        var cancellationToken = CancellationToken.None;
+            // Act
+            var result = await _conversaoGateway.ObterConversoesPorUsuarioAsync(usuarioId, CancellationToken.None);
 
-        _s3ServiceMock.Setup(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo)).ThrowsAsync(new AmazonS3Exception("Error uploading file"));
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+            _repositoryMock.Verify(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>()), Times.Once);
+        }
 
-        // Act & Assert
-        await Assert.ThrowsAsync<AmazonS3Exception>(() => _conversaoGateway.EfetuarUploadAsync(conversao, cancellationToken));
-        _s3ServiceMock.Verify(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo), Times.Once);
-        _s3ServiceMock.Verify(s => s.GerarPreSignedUrl(It.IsAny<string>(), 120), Times.Never);
-        _repositoryMock.Verify(r => r.SaveAsync(It.IsAny<ConversaoDb>(), cancellationToken), Times.Never);
-        _sqsServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>()), Times.Never);
-    }
+        [Fact]
+        public async Task ObterConversoesPorUsuarioAsync_EmptyResult()
+        {
+            // Arrange
+            var usuarioId = "id-do-usuario";
+            var asyncSearchMock = new Mock<AsyncSearch<ConversaoDb>>();
+            asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+            _repositoryMock.Setup(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>())).Returns(asyncSearchMock.Object);
 
-    [Fact]
-    public async Task EfetuarUploadAsync_Failure_SendMessageAsyncReturnsFalse()
-    {
-        // Arrange
-        var conversao = new Conversao(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, Status.AguardandoConversao, "video.mp4", new Mock<IFormFile>().Object);
-        var cancellationToken = CancellationToken.None;
-        var urlArquivoVideo = "https://amzn-s3-bucket-26bda3ac-c185-4185-a9f8-d3697a89754c-framepack.s3.amazonaws.com/aguardando-processamento/video.mp4";
-        var preSignedUrl = "https://s3.amazonaws.com/bucket/video.mp4?signature=abc123";
+            // Act
+            var result = await _conversaoGateway.ObterConversoesPorUsuarioAsync(usuarioId, CancellationToken.None);
 
-        _s3ServiceMock.Setup(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo)).ReturnsAsync(urlArquivoVideo);
-        _s3ServiceMock.Setup(s => s.GerarPreSignedUrl(urlArquivoVideo, 120)).Returns(preSignedUrl);
-        _repositoryMock.Setup(r => r.SaveAsync(It.IsAny<ConversaoDb>(), cancellationToken)).Returns(Task.CompletedTask);
-        _sqsServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>())).ReturnsAsync(false);
+            // Assert
+            Assert.Empty(result);
+            _repositoryMock.Verify(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>()), Times.Once);
+        }
 
-        // Act
-        var result = await _conversaoGateway.EfetuarUploadAsync(conversao, cancellationToken);
+        [Fact]
+        public async Task EfetuarDownloadAsync_Failure()
+        {
+            // Arrange
+            var usuarioId = "id-do-usuario";
+            var conversao = new Conversao(Guid.NewGuid(), usuarioId, DateTime.UtcNow, Status.Concluido, "video.mp4", "http://s3.com/video.mp4", "http://s3.com/video.zip");
+            _s3ServiceMock.Setup(s => s.GerarPreSignedUrl(conversao.UrlArquivoCompactado, It.IsAny<int>())).Returns("http://s3.com/video.zip");
+            var responseMessage = new HttpResponseMessage(HttpStatusCode.NotFound);
+            var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
+            httpMessageHandlerMock.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(responseMessage);
+            var httpClient = new HttpClient(httpMessageHandlerMock.Object);
 
-        // Assert
-        Assert.False(result);
-        _s3ServiceMock.Verify(s => s.UploadArquivoAsync(conversao.Id, conversao.ArquivoVideo), Times.Once);
-        _s3ServiceMock.Verify(s => s.GerarPreSignedUrl(urlArquivoVideo, 120), Times.Once);
-        _repositoryMock.Verify(r => r.SaveAsync(It.IsAny<ConversaoDb>(), cancellationToken), Times.Once);
-        _sqsServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<ConversaoSolicitadaEvent>()), Times.Once);
+            // Act & Assert
+            await Assert.ThrowsAsync<HttpRequestException>(() => _conversaoGateway.EfetuarDownloadAsync(conversao, CancellationToken.None));
+            _s3ServiceMock.Verify(s => s.GerarPreSignedUrl(conversao.UrlArquivoCompactado, It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task ObterConversaoAsync_Success()
+        {
+            // Arrange
+            var usuarioId = "id-do-usuario";
+            var conversaoId = Guid.NewGuid();
+            var conversaoDbList = new List<ConversaoDb>
+                {
+                    new() { Id = conversaoId, UsuarioId = usuarioId, Status = "AguardandoConversao", Data = DateTime.UtcNow, NomeArquivo = "video.mp4", UrlArquivoVideo = "http://s3.com/video.mp4" }
+                };
+            var asyncSearchMock = new Mock<AsyncSearch<ConversaoDb>>();
+            asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync(conversaoDbList);
+            _repositoryMock.Setup(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>())).Returns(asyncSearchMock.Object);
+
+            // Act
+            var result = await _conversaoGateway.ObterConversaoAsync(usuarioId, conversaoId, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(conversaoId, result.Id);
+            _repositoryMock.Verify(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task ObterConversaoAsync_NotFound()
+        {
+            // Arrange
+            var usuarioId = "id-do-usuario";
+            var conversaoId = Guid.NewGuid();
+            var asyncSearchMock = new Mock<AsyncSearch<ConversaoDb>>();
+            asyncSearchMock.Setup(a => a.GetRemainingAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+            _repositoryMock.Setup(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>())).Returns(asyncSearchMock.Object);
+
+            // Act
+            var result = await _conversaoGateway.ObterConversaoAsync(usuarioId, conversaoId, CancellationToken.None);
+
+            // Assert
+            Assert.Null(result);
+            _repositoryMock.Verify(r => r.ScanAsync<ConversaoDb>(It.IsAny<List<ScanCondition>>(), It.IsAny<DynamoDBOperationConfig>()), Times.Once);
+        }
     }
 }

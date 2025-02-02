@@ -22,20 +22,33 @@
 # Aplicação Framepack-WebApi (backend)
 
 Este projeto visa o desenvolvimento do backend para um software de processamento de imagens. O software processa um vídeo, extrai os frames e retorna as imagens em um arquivo .zip.<br>
-Utilizando a arquitetura limpa, .NET 8, SQL Server, Cognito, Amazon SQS, Docker e Kubernetes, o objetivo é criar uma base sólida e escalável para suportar as funcionalidades necessárias para um sistema de autoatendimento. <br>
+Utilizando a arquitetura limpa, .NET 8, SQL Server, Cognito, Amazon SQS, Docker e Kubernetes, o objetivo é criar uma base sólida e escalável para suportar as funcionalidades necessárias para um sistema de conversão de videos em frames. <br>
 O foco principal é a criação de uma aplicação robusta, modular e de fácil manutenção.<br>
 Este microserviço tem como pricipal objetivo ser responsável pelo cadastro de clientes, funcionários e produtos.<br>
 
 ## Funcionalidades Principais
 
-- **xxxxxxxxxx:**<br>
-- **yyyyyyyyyy:**<br>
-- **Gerenciamento de Usuários**: Gestão de usuários (funcionários ou clientes) integrados com o Cognito, permitindo o cadastro, confirmação do e-mail e recuperação de senha. <br>
-- **Armazenamento de Dados**: Persistência de dados utilizando um banco de dados adequado SQL Server. <br>
+- **Processamento de Vídeos**: Processa vídeos, extrai frames e retorna as imagens em um arquivo .zip.
+- **Gerenciamento de Usuários**: Gestão de usuários (funcionários ou clientes) integrados com o Cognito, permitindo o cadastro, confirmação do e-mail e recuperação de senha.
+- **Armazenamento de Dados**: Persistência de dados utilizando um banco de dados SQL Server.
+- **Fila de Processamento**: Utilização do Amazon SQS para gerenciar a fila de processamento dos vídeos.
+- **Armazenamento de Arquivos**: Utilização do Amazon S3 para armazenar os vídeos enviados e os arquivos .zip gerados.
+- **Notificações por Email**: Envio de emails de notificação aos usuários sobre o status do processamento utilizando Amazon SES.
+- **Containerização e Orquestração**: Utilização de Docker para containerização e Kubernetes para orquestração dos containers, garantindo portabilidade e resiliência da aplicação.
+- **CI/CD Automatizado**: Automação de todo o CI/CD através de pipelines utilizando Github Actions.
+- **Análise de Código**: Análise estática do código para promover qualidade utilizando SonarQube.
 
 ## Estrutura do Projeto
 
-A arquitetura limpa será utilizada para garantir que a aplicação seja modular e de fácil manutenção, o projeto foi estruturado da seguinte forma: API, Controllers, Gateways, Gateways.Cognito, Presenters, Domain, Infra (implementação das interfaces de repositório, configurações de banco de dados) e Building Blocks (componentes e serviços reutilizáveis)<br>
+- **Api**: Contém a API principal do projeto.
+- **BuildingBlocks**: Contém serviços e utilitários comuns, como o serviço de integração com o S3.
+- **Controllers**: Contém os controladores responsáveis por lidar com as requisições HTTP.
+- **DevOps**: Contém scripts e configurações para Docker e Kubernetes.
+- **Domain**: Contém as entidades e regras de negócio do domínio.
+- **Gateways**: Contém os handlers responsáveis pelo processamento de vídeos.
+- **Gateways.Cognito**: Contém a integração com o Amazon Cognito para autenticação e autorização.
+- **Infra**: Contém a infraestrutura necessária para o funcionamento do projeto, como configurações de banco de dados e serviços externos.
+- **UseCases**: Contém os casos de uso principais do worker.
 
 ## Tecnologias Utilizadas
 
@@ -77,27 +90,84 @@ docker-compose up --build
 
 ### Executar com Kubernetes
 2. Kubernetes
-2.1. Navegue até o diretório do projeto:
-```
-cd framepack-api-hackathon\src\DevOps\kubernetes
-```
-2.2. Configure o ambiente Docker:
-```
-kubectl apply -f 06-framepack-api-deployment.yaml
-kubectl apply -f 07-framepack-api-service.yaml
-kubectl apply -f 08-framepack-api-hpa.yaml
-kubectl port-forward svc/framepack-api 8080:80
-```
-ou executar todos scripts via PowerShell
-```
-Get-ExecutionPolicy
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
-.\delete-k8s-resources.ps1
-.\apply-k8s-resources.ps1
-```
-2.3. A aplicação estará disponível em http://localhost:8080
-2.4. URL do Swagger: http://localhost:8080/swagger
-2.5. URL do Healthcheck da API: http://localhost:8080/health
+
+Para executar o projeto com Kubernetes, siga os passos abaixo:
+
+**Crie um arquivo `.env`** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
+
+  ```plaintext
+  AWS_ACCESS_KEY_ID=your_access_key_id
+  AWS_SECRET_ACCESS_KEY=your_secret_access_key
+  AWS_REGION=your_region
+  ```
+
+**Navegue até o diretório do projeto**:
+
+  ```
+  cd framepack-api-hackathon\src\DevOps\kubernetes
+  ```
+  
+**Crie um Secret no Kubernetes** a partir do arquivo [.env]:
+
+  ```sh
+  kubectl create secret generic aws-secret --from-env-file=framepack-api-hackathon/.env
+  ```
+
+**Aplique os arquivos YAML** para configurar os recursos do Kubernetes:
+
+  ```sh
+  kubectl apply -f 01-dynamodb-local-deployment.yaml
+  kubectl apply -f 02-dynamodb-local-service.yaml
+  kubectl apply -f 03-dynamodb-local-setup-deployment.yaml
+  kubectl apply -f 04-framepack-worker-deployment.yaml
+  kubectl apply -f 05-framepack-worker-hpa.yaml
+  kubectl apply -f 06-framepack-worker-service.yaml
+  kubectl apply -f 07-framepack-api-deployment.yaml
+  kubectl apply -f 08-framepack-api-service.yaml
+  kubectl apply -f 09-framepack-api-hpa.yaml
+  ```
+
+**Aguarde até que os pods da API e do Worker estejam em execução**:
+
+  ```sh
+  kubectl get pods -l app=framepack-api
+  kubectl get pods -l app=framepack-worker
+  ```
+
+**Configure o port-forwarding** para os serviços da API e do Worker:
+
+  ```sh
+  kubectl port-forward svc/framepack-api-service 8080:80
+  kubectl port-forward svc/framepack-worker-service 8081:80
+  ```
+
+### Usando o Script PowerShell
+
+Se preferir, você pode executar o script PowerShell que automatiza todos os passos acima:
+
+**Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
+
+  ```plaintext
+  AWS_ACCESS_KEY_ID=your_access_key_id
+  AWS_SECRET_ACCESS_KEY=your_secret_access_key
+  AWS_REGION=your_region
+  ```
+**Execute o script PowerShell** para criar o Secret e aplicar os recursos do Kubernetes:
+
+  ```powershell
+  Get-ExecutionPolicy
+  Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+  .\delete-k8s-resources.ps1
+  .\apply-k8s-resources.ps1
+  ```
+Este script irá:
+
+- Criar um Secret no Kubernetes a partir do arquivo [.env].
+- Aplicar todos os arquivos YAML necessários para configurar os recursos do Kubernetes.
+- Aguardar até que os pods da API e do Worker estejam em execução.
+- Configurar o port-forwarding para os serviços da API e do Worker.
+
+Certifique-se de ter o `kubectl` instalado e configurado corretamente em sua máquina antes de executar o script.
 
 ## Collection com todas as APIs com exemplos de requisição
 1. Caso deseje testar via postman com dados fake importe o arquivo...

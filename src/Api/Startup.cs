@@ -50,7 +50,8 @@ namespace Api
 
             var sqsQueues = new Queues
             {
-                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent
+                QueueConversaoSolicitadaEvent = settings.AwsSqsSettings.QueueConversaoSolicitadaEvent,
+                QueueDownloadEfetuadoEvent = settings.AwsSqsSettings.QueueDownloadEfetuadoEvent
             };
 
             services.AddGatewayDependencyServices(settings.AwsDynamoDbSettings.ServiceUrl, settings.AwsDynamoDbSettings.AccessKey, settings.AwsDynamoDbSettings.SecretKey, sqsQueues);

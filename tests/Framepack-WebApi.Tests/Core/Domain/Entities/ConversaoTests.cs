@@ -12,7 +12,7 @@ namespace Framepack_WebApi.Tests.Core.Domain.Entities
         {
             // Arrange
             var id = Guid.NewGuid();
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var data = DateTime.Now;
             var status = Status.AguardandoConversao;
             var nomeArquivo = "video.mp4";
@@ -34,7 +34,7 @@ namespace Framepack_WebApi.Tests.Core.Domain.Entities
         {
             // Arrange
             var id = Guid.NewGuid();
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var data = DateTime.Now;
             var status = Status.AguardandoConversao;
             var nomeArquivo = "video.mp4";
@@ -54,7 +54,7 @@ namespace Framepack_WebApi.Tests.Core.Domain.Entities
         public void ValidarConversao_DeveFalharQuandoIdForInvalido()
         {
             // Arrange
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var data = DateTime.Now;
             var status = Status.AguardandoConversao;
             var nomeArquivo = "video.mp4";
@@ -75,11 +75,12 @@ namespace Framepack_WebApi.Tests.Core.Domain.Entities
         {
             // Arrange
             var id = Guid.NewGuid();
+            var usuarioId = string.Empty; // UsuarioId inválido
             var data = DateTime.Now;
             var status = Status.AguardandoConversao;
             var nomeArquivo = "video.mp4";
             var urlArquivoVideo = new Mock<IFormFile>();
-            var conversao = new Conversao(id, Guid.Empty, data, status, nomeArquivo, urlArquivoVideo.Object);
+            var conversao = new Conversao(id, usuarioId, data, status, nomeArquivo, urlArquivoVideo.Object);
             var validator = new ValidarConversao();
 
             // Act
@@ -95,7 +96,7 @@ namespace Framepack_WebApi.Tests.Core.Domain.Entities
         {
             // Arrange
             var id = Guid.NewGuid();
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var status = Status.AguardandoConversao;
             var nomeArquivo = "video.mp4";
             var urlArquivoVideo = new Mock<IFormFile>();
@@ -115,7 +116,7 @@ namespace Framepack_WebApi.Tests.Core.Domain.Entities
         {
             // Arrange
             var id = Guid.NewGuid();
-            var usuarioId = Guid.NewGuid();
+            var usuarioId = "id-do-usuario";
             var data = DateTime.Now;
             var status = Status.AguardandoConversao;
             var nomeArquivo = "a"; // NomeArquivo com menos de 2 caracteres

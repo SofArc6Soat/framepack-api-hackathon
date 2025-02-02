@@ -9,7 +9,10 @@ namespace Infra.Dto
         public Guid Id { get; set; }
 
         [DynamoDBProperty]
-        public Guid UsuarioId { get; set; }
+        public string UsuarioId { get; set; } = string.Empty;
+
+        [DynamoDBProperty]
+        public string EmailUsuario { get; set; } = string.Empty;
 
         [DynamoDBProperty]
         public string Status { get; set; } = string.Empty;

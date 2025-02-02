@@ -37,7 +37,7 @@ namespace Gateways.Cognito
             }
 
             var signUpRequest = _cognitoFactory.CreateSignUpRequest(usuario.Email, senha, usuario.Nome);
-            var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "admin");
+            var adminAddUserToGroupRequest = _cognitoFactory.CreateAddUserToGroupRequest(usuario.Email, "usuarios");
 
             return await CriarUsuarioCognitoAsync(signUpRequest, adminAddUserToGroupRequest, usuario.Email, cancellationToken);
         }
@@ -127,7 +127,7 @@ namespace Gateways.Cognito
                     }
                     catch (NotAuthorizedException)
                     {
-                        throw new NotAuthorizedException("Credenciais inválidas.");
+                        return null;
                     }
                     catch (UserNotConfirmedException)
                     {
@@ -172,22 +172,37 @@ namespace Gateways.Cognito
             }
         }
 
+        public async Task<AdminGetUserResponse> ObertUsuarioCognitoPorIdAsync(string userId, CancellationToken cancellationToken)
+        {
+            var request = new AdminGetUserRequest
+            {
+                Username = userId,
+                UserPoolId = _userPoolId
+            };
+
+            var response = await _cognitoClientIdentityProvider.AdminGetUserAsync(request, cancellationToken);
+
+            return response;
+        }
+
         private async Task<bool> CriarUsuarioCognitoAsync(SignUpRequest signUpRequest, AdminAddUserToGroupRequest addToGroupRequest, string email, CancellationToken cancellationToken)
         {
             try
             {
                 var signUpResponse = await _cognitoClientIdentityProvider.SignUpAsync(signUpRequest, cancellationToken);
 
-                if (signUpResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                if (signUpResponse.HttpStatusCode is System.Net.HttpStatusCode.OK)
                 {
                     var addToGroupResponse = await _cognitoClientIdentityProvider.AdminAddUserToGroupAsync(addToGroupRequest, cancellationToken);
 
-                    if (addToGroupResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                    if (addToGroupResponse.HttpStatusCode is System.Net.HttpStatusCode.OK)
                     {
                         return true;
                     }
 
                     await DeletarUsuarioCognitoAsync(email, cancellationToken);
+
+                    return false;
                 }
 
                 return false;
