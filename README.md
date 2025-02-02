@@ -40,7 +40,15 @@ Este microserviço tem como pricipal objetivo ser responsável pelo cadastro de 
 
 ## Estrutura do Projeto
 
-A arquitetura limpa será utilizada para garantir que a aplicação seja modular e de fácil manutenção, o projeto foi estruturado da seguinte forma: API, Controllers, Gateways, Gateways.Cognito, Presenters, Domain, Infra (implementação das interfaces de repositório, configurações de banco de dados) e Building Blocks (componentes e serviços reutilizáveis)<br>
+- **Api**: Contém a API principal do projeto.
+- **BuildingBlocks**: Contém serviços e utilitários comuns, como o serviço de integração com o S3.
+- **Controllers**: Contém os controladores responsáveis por lidar com as requisições HTTP.
+- **DevOps**: Contém scripts e configurações para Docker e Kubernetes.
+- **Domain**: Contém as entidades e regras de negócio do domínio.
+- **Gateways**: Contém os handlers responsáveis pelo processamento de vídeos.
+- **Gateways.Cognito**: Contém a integração com o Amazon Cognito para autenticação e autorização.
+- **Infra**: Contém a infraestrutura necessária para o funcionamento do projeto, como configurações de banco de dados e serviços externos.
+- **UseCases**: Contém os casos de uso principais do worker.
 
 ## Tecnologias Utilizadas
 
