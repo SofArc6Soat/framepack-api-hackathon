@@ -399,3 +399,4 @@ FodyWeavers.xsd
 
 # Outros
 .sonarqube/*
+src/DevOps/kubernetes/.env

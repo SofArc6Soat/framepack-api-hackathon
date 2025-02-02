@@ -6,9 +6,9 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: quickfood-backend
+    name: framepack-api
   minReplicas: 1
-  maxReplicas: 2
+  maxReplicas: 5
   metrics:
   - type: Resource
     resource:
