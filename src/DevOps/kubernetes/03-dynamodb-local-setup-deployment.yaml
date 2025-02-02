@@ -17,11 +17,20 @@ spec:
         image: amazon/aws-cli
         env:
         - name: AWS_ACCESS_KEY_ID
-          value: ''
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_ACCESS_KEY_ID
         - name: AWS_SECRET_ACCESS_KEY
-          value: ''
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_SECRET_ACCESS_KEY
         - name: AWS_REGION
-          value: ''
+          valueFrom:
+            secretKeyRef:
+              name: aws-secret
+              key: AWS_REGION
         volumeMounts:
         - name: dynamodb-schemas
           mountPath: /tmp/dynamo
