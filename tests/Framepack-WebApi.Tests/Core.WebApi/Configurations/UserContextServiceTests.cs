@@ -1,12 +1,7 @@
 ﻿using Core.WebApi.Configurations;
 using Microsoft.AspNetCore.Http;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Framepack_WebApi.Tests.Core.WebApi.Configurations;
 
@@ -17,7 +12,7 @@ public class UserContextServiceTests
     {
         // Arrange
         var userId = "12345";
-        var claims = new List<Claim> { new Claim("UserId", userId) };
+        var claims = new List<Claim> { new("UserId", userId) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 

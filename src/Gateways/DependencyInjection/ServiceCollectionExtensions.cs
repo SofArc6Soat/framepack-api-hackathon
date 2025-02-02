@@ -25,6 +25,7 @@ namespace Gateways.DependencyInjection
             services.AddAwsSqsMessageBroker();
 
             services.AddSingleton<ISqsService<ConversaoSolicitadaEvent>>(provider => new SqsService<ConversaoSolicitadaEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueConversaoSolicitadaEvent));
+            services.AddSingleton<ISqsService<DownloadEfetuadoEvent>>(provider => new SqsService<DownloadEfetuadoEvent>(provider.GetRequiredService<IAmazonSQS>(), queues.QueueDownloadEfetuadoEvent));
         }
     }
 
@@ -32,5 +33,6 @@ namespace Gateways.DependencyInjection
     public record Queues
     {
         public string QueueConversaoSolicitadaEvent { get; set; } = string.Empty;
+        public string QueueDownloadEfetuadoEvent { get; set; } = string.Empty;
     }
 }

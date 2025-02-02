@@ -16,6 +16,7 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
     {
         private readonly Mock<IDynamoDBContext> _repositoryMock;
         private readonly Mock<ISqsService<ConversaoSolicitadaEvent>> _sqsServiceMock;
+        private readonly Mock<ISqsService<DownloadEfetuadoEvent>> _sqsDownloadServiceMock;
         private readonly Mock<IS3Service> _s3ServiceMock;
         private readonly ConversaoGateway _conversaoGateway;
 
@@ -23,8 +24,9 @@ namespace Framepack_WebApi.Tests.Adpters.Gateways
         {
             _repositoryMock = new Mock<IDynamoDBContext>();
             _sqsServiceMock = new Mock<ISqsService<ConversaoSolicitadaEvent>>();
+            _sqsDownloadServiceMock = new Mock<ISqsService<DownloadEfetuadoEvent>>();
             _s3ServiceMock = new Mock<IS3Service>();
-            _conversaoGateway = new ConversaoGateway(_repositoryMock.Object, _sqsServiceMock.Object, _s3ServiceMock.Object);
+            _conversaoGateway = new ConversaoGateway(_repositoryMock.Object, _sqsServiceMock.Object, _sqsDownloadServiceMock.Object, _s3ServiceMock.Object);
         }
 
         [Fact]

@@ -33,8 +33,7 @@ namespace Controllers
                     Id = item.Id,
                     Data = item.Data,
                     Status = item.Status.ToString(),
-                    NomeArquivo = item.NomeArquivo,
-                    UrlArquivoCompactado = item.UrlArquivoCompactado
+                    NomeArquivo = item.NomeArquivo
                 });
             }
 
