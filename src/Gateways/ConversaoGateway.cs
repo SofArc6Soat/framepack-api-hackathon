@@ -105,7 +105,7 @@ namespace Gateways
         private static DownloadEfetuadoEvent GerarDownloadEfetuadoEvent(Conversao conversaoDto) => new()
         {
             Id = conversaoDto.Id,
-            UrlArquivoVideo = conversaoDto.UrlArquivoVideo
+            UrlArquivoVideo = conversaoDto.UrlArquivoCompactado
         };
 
         private static Conversao ToConversao(ConversaoDb conversaoDb)
