@@ -9,7 +9,7 @@ using Infra.Dto;
 
 namespace Gateways
 {
-    public class ConversaoGateway(IDynamoDBContext repository, ISqsService<ConversaoSolicitadaEvent> sqsService, IS3Service s3Service) : IConversaoGateway
+    public class ConversaoGateway(IDynamoDBContext repository, ISqsService<ConversaoSolicitadaEvent> sqsService, ISqsService<DownloadEfetuadoEvent> sqsServiceDownload, IS3Service s3Service) : IConversaoGateway
     {
         public async Task<bool> EfetuarUploadAsync(Conversao conversao, CancellationToken cancellationToken)
         {
@@ -26,6 +26,7 @@ namespace Gateways
             {
                 Id = conversao.Id,
                 UsuarioId = conversao.UsuarioId,
+                EmailUsuario = conversao.EmailUsuario,
                 Status = conversao.Status.ToString(),
                 Data = conversao.Data,
                 NomeArquivo = conversao.NomeArquivo,
@@ -65,7 +66,14 @@ namespace Gateways
 
             var arquivoBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
 
-            return arquivoBytes is null ? null : new Arquivo(arquivoBytes, string.Concat(conversao.NomeArquivo, ".zip"));
+            if (arquivoBytes is null)
+            {
+                return null;
+            }
+
+            await sqsServiceDownload.SendMessageAsync(GerarDownloadEfetuadoEvent(conversao));
+
+            return new Arquivo(arquivoBytes, string.Concat(conversao.NomeArquivo, ".zip"));
         }
 
         public async Task<Conversao?> ObterConversaoAsync(string usuarioId, Guid conversaoId, CancellationToken cancellationToken)
@@ -87,10 +95,17 @@ namespace Gateways
         {
             Id = conversaoDto.Id,
             UsuarioId = conversaoDto.UsuarioId,
+            EmailUsuario = conversaoDto.EmailUsuario,
             Data = conversaoDto.Data,
             Status = conversaoDto.Status,
             NomeArquivo = conversaoDto.NomeArquivo,
             UrlArquivoVideo = conversaoDto.UrlArquivoVideo
+        };
+
+        private static DownloadEfetuadoEvent GerarDownloadEfetuadoEvent(Conversao conversaoDto) => new()
+        {
+            Id = conversaoDto.Id,
+            UrlArquivoVideo = conversaoDto.UrlArquivoCompactado
         };
 
         private static Conversao ToConversao(ConversaoDb conversaoDb)

@@ -172,6 +172,19 @@ namespace Gateways.Cognito
             }
         }
 
+        public async Task<AdminGetUserResponse> ObertUsuarioCognitoPorIdAsync(string userId, CancellationToken cancellationToken)
+        {
+            var request = new AdminGetUserRequest
+            {
+                Username = userId,
+                UserPoolId = _userPoolId
+            };
+
+            var response = await _cognitoClientIdentityProvider.AdminGetUserAsync(request, cancellationToken);
+
+            return response;
+        }
+
         private async Task<bool> CriarUsuarioCognitoAsync(SignUpRequest signUpRequest, AdminAddUserToGroupRequest addToGroupRequest, string email, CancellationToken cancellationToken)
         {
             try
