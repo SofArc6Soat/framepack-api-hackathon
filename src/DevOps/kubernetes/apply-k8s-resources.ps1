@@ -1,5 +1,5 @@
 # Criar o Secret a partir do arquivo .env
-kubectl create secret generic aws-secret --from-env-file=framepack-api-hackathon/.env
+kubectl create secret generic aws-secret --from-env-file=./.env
 
 # Aplicar todos os arquivos YAML
 kubectl apply -f 01-dynamodb-local-deployment.yaml
@@ -21,13 +21,13 @@ function WaitForPod {
         $podStatus = kubectl get pods -l app=$label -o jsonpath='{.items[*].status.phase}'
         $podStatusArray = $podStatus -split ' '
         if ($podStatusArray -contains 'Running') {
-            Write-Output "Pod $label está em execução."
+            Write-Output "Pod ${label} está em execução."
             break
         }
         else {
-            Write-Output "Status atual do pod $label: $podStatus"
+            Write-Output "Status atual do pod ${label}: ${podStatus}"
         }
-        Write-Output "Esperando o pod $label estar em execução..."
+        Write-Output "Esperando o pod ${label} estar em execução..."
         Start-Sleep -Seconds 5
     }
 }
