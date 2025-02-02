@@ -22,16 +22,21 @@
 # Aplicação Framepack-WebApi (backend)
 
 Este projeto visa o desenvolvimento do backend para um software de processamento de imagens. O software processa um vídeo, extrai os frames e retorna as imagens em um arquivo .zip.<br>
-Utilizando a arquitetura limpa, .NET 8, SQL Server, Cognito, Amazon SQS, Docker e Kubernetes, o objetivo é criar uma base sólida e escalável para suportar as funcionalidades necessárias para um sistema de autoatendimento. <br>
+Utilizando a arquitetura limpa, .NET 8, SQL Server, Cognito, Amazon SQS, Docker e Kubernetes, o objetivo é criar uma base sólida e escalável para suportar as funcionalidades necessárias para um sistema de conversão de videos em frames. <br>
 O foco principal é a criação de uma aplicação robusta, modular e de fácil manutenção.<br>
 Este microserviço tem como pricipal objetivo ser responsável pelo cadastro de clientes, funcionários e produtos.<br>
 
 ## Funcionalidades Principais
 
-- **xxxxxxxxxx:**<br>
-- **yyyyyyyyyy:**<br>
-- **Gerenciamento de Usuários**: Gestão de usuários (funcionários ou clientes) integrados com o Cognito, permitindo o cadastro, confirmação do e-mail e recuperação de senha. <br>
-- **Armazenamento de Dados**: Persistência de dados utilizando um banco de dados adequado SQL Server. <br>
+- **Processamento de Vídeos**: Processa vídeos, extrai frames e retorna as imagens em um arquivo .zip.
+- **Gerenciamento de Usuários**: Gestão de usuários (funcionários ou clientes) integrados com o Cognito, permitindo o cadastro, confirmação do e-mail e recuperação de senha.
+- **Armazenamento de Dados**: Persistência de dados utilizando um banco de dados SQL Server.
+- **Fila de Processamento**: Utilização do Amazon SQS para gerenciar a fila de processamento dos vídeos.
+- **Armazenamento de Arquivos**: Utilização do Amazon S3 para armazenar os vídeos enviados e os arquivos .zip gerados.
+- **Notificações por Email**: Envio de emails de notificação aos usuários sobre o status do processamento utilizando Amazon SES.
+- **Containerização e Orquestração**: Utilização de Docker para containerização e Kubernetes para orquestração dos containers, garantindo portabilidade e resiliência da aplicação.
+- **CI/CD Automatizado**: Automação de todo o CI/CD através de pipelines utilizando Github Actions.
+- **Análise de Código**: Análise estática do código para promover qualidade utilizando SonarQube.
 
 ## Estrutura do Projeto
 
