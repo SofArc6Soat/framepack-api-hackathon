@@ -399,3 +399,4 @@ FodyWeavers.xsd
 
 # Outros
 .sonarqube/*
+.env
