@@ -17,10 +17,8 @@ services:
     image: amazon/aws-cli
     volumes:
       - "./tests/schemas:/tmp/dynamo"
-    environment:
-      AWS_ACCESS_KEY_ID: ''
-      AWS_SECRET_ACCESS_KEY: ''
-      AWS_REGION: ''
+    env_file:
+      - ../kubernetes/.env
 
   framepack-api:
     build:
