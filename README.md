@@ -70,30 +70,30 @@ Este microserviço tem como pricipal objetivo ser responsável pelo cadastro de 
 ## Como Executar o Projeto
 
 ### Clonar o repositório
-```
-git clone https://github.com/SofArc6Soat/framepack-api-hackathon.git
-```
+  ```
+  git clone https://github.com/SofArc6Soat/framepack-api-hackathon.git
+  ```
 
 ### Executar com docker-compose
-1. Docker (docker-compose)
-1.1. Navegue até o diretório do projeto:
-```
-cd framepack-api-hackathon\src\DevOps
-```
-2. Configure o ambiente Docker:
-```
-docker-compose up --build
-```
-2.1. A aplicação estará disponível em http://localhost:5001
-2.2. URL do Swagger: http://localhost:5001/swagger
-2.3. URL do Healthcheck da API: http://localhost:5001/health
+#### Docker (docker-compose)
+- **Navegue até o diretório do projeto:**
+  ```
+  cd framepack-api-hackathon\src\DevOps
+  ```
+- **Configure o ambiente Docker:**
+  ```
+  docker-compose up --build
+  ```
+- **A aplicação estará disponível em:** http://localhost:5001
+- **URL do Swagger:** http://localhost:5001/swagger
+- **URL do Healthcheck da API:** http://localhost:5001/health
 
 ### Executar com Kubernetes
-2. Kubernetes
+#### Kubernetes
 
 Para executar o projeto com Kubernetes, siga os passos abaixo:
 
-**Crie um arquivo `.env`** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
+- **Crie um arquivo `.env`** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
 
   ```plaintext
   AWS_ACCESS_KEY_ID=your_access_key_id
@@ -101,41 +101,33 @@ Para executar o projeto com Kubernetes, siga os passos abaixo:
   AWS_REGION=your_region
   ```
 
-**Navegue até o diretório do projeto**:
-
+- **Navegue até o diretório do projeto**:
   ```
   cd framepack-api-hackathon\src\DevOps\kubernetes
   ```
   
-**Crie um Secret no Kubernetes** a partir do arquivo [.env]:
-
+- **Crie um Secret no Kubernetes** a partir do arquivo [.env]:
   ```sh
   kubectl create secret generic aws-secret --from-env-file=framepack-api-hackathon/.env
   ```
 
-**Aplique os arquivos YAML** para configurar os recursos do Kubernetes:
-
+- **Aplique os arquivos YAML** para configurar os recursos do Kubernetes:
   ```sh
   kubectl apply -f 01-dynamodb-local-deployment.yaml
   kubectl apply -f 02-dynamodb-local-service.yaml
   kubectl apply -f 03-dynamodb-local-setup-deployment.yaml
-  kubectl apply -f 04-framepack-worker-deployment.yaml
-  kubectl apply -f 05-framepack-worker-hpa.yaml
-  kubectl apply -f 06-framepack-worker-service.yaml
-  kubectl apply -f 07-framepack-api-deployment.yaml
-  kubectl apply -f 08-framepack-api-service.yaml
-  kubectl apply -f 09-framepack-api-hpa.yaml
+  kubectl apply -f 04-framepack-api-deployment.yaml
+  kubectl apply -f 05-framepack-api-service.yaml
+  kubectl apply -f 06-framepack-api-hpa.yaml
   ```
 
-**Aguarde até que os pods da API e do Worker estejam em execução**:
-
+- **Aguarde até que os pods da API e do Worker estejam em execução**:
   ```sh
   kubectl get pods -l app=framepack-api
   kubectl get pods -l app=framepack-worker
   ```
 
-**Configure o port-forwarding** para os serviços da API e do Worker:
-
+- **Configure o port-forwarding** para os serviços da API e do Worker:
   ```sh
   kubectl port-forward svc/framepack-api-service 8080:80
   kubectl port-forward svc/framepack-worker-service 8081:80
@@ -145,14 +137,14 @@ Para executar o projeto com Kubernetes, siga os passos abaixo:
 
 Se preferir, você pode executar o script PowerShell que automatiza todos os passos acima:
 
-**Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
+- **Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
 
   ```plaintext
   AWS_ACCESS_KEY_ID=your_access_key_id
   AWS_SECRET_ACCESS_KEY=your_secret_access_key
   AWS_REGION=your_region
   ```
-**Execute o script PowerShell** para criar o Secret e aplicar os recursos do Kubernetes:
+- **Execute o script PowerShell** para criar o Secret e aplicar os recursos do Kubernetes:
 
   ```powershell
   Get-ExecutionPolicy
@@ -168,15 +160,6 @@ Este script irá:
 - Configurar o port-forwarding para os serviços da API e do Worker.
 
 Certifique-se de ter o `kubectl` instalado e configurado corretamente em sua máquina antes de executar o script.
-
-## Collection com todas as APIs com exemplos de requisição
-1. Caso deseje testar via postman com dados fake importe o arquivo...
-
-2. Também é possível utilizar o Swagger disponibilizado pela aplicação (URL do Swagger: http://localhost:8080/swagger).
-
-Para testar localmente com o Postman, a ordem de excução deverá ser a seguinte:
-
-1. Caso deseje se autenticar pela API ao invés da função Lambda também é possível. Usuários para testes:
 
 ## Desenho da arquitetura
 Para visualizar o desenho da arquitetura abra o arquivo "Arquitetura-Infra.drawio.png" e "Arquitetura-Macro.drawio.png" no diretório "arquitetura" ou importe o arquivo "Arquitetura.drawio" no Draw.io (https://app.diagrams.net/).
