@@ -3,12 +3,15 @@
   - [Estrutura do Projeto](#estrutura-do-projeto)
   - [Tecnologias Utilizadas](#tecnologias-utilizadas)
   - [Serviços Utilizados](#serviços-utilizados)
-  - [Motivações para Utilizar o SQL Server como Banco de Dados da Aplicação](#motivações-para-utilizar-o-sql-server-como-banco-de-dados-da-aplicação)
+- [Aplicação Framepack-Worker](#aplicação-framepack-worker)
+  - [Funcionalidades Principais](#funcionalidades-principais-1)
+  - [Estrutura do Projeto](#estrutura-do-projeto-1)
+  - [Tecnologias Utilizadas](#tecnologias-utilizadas-1)
+  - [Serviços Utilizados](#serviços-utilizados-1)
   - [Como Executar o Projeto](#como-executar-o-projeto)
     - [Clonar o repositório](#clonar-o-repositório)
     - [Executar com docker-compose](#executar-com-docker-compose)
     - [Executar com Kubernetes](#executar-com-kubernetes)
-  - [Collection com todas as APIs com exemplos de requisição](#collection-com-todas-as-apis-com-exemplos-de-requisição)
   - [Desenho da arquitetura](#desenho-da-arquitetura)
   - [Demonstração em vídeo](#demonstração-em-vídeo)
   - [Relatório de Cobertura](#relatório-de-cobertura)
@@ -16,6 +19,7 @@
   - [Documentação Adicional](#documentação-adicional)
   - [Repositórios microserviços](#repositórios-microserviços)
   - [Repositórios diversos](#repositórios-diversos)
+
 
 ---
 
@@ -67,7 +71,46 @@ Este microserviço tem como pricipal objetivo ser responsável pelo cadastro de 
 - **Github Actions**: Todo o CI/CD é automatizado através de pipelines. <br>
 - **SonarQube**: Análise estática do código para promover qualidade. <br>
 
-## Como Executar o Projeto
+---
+
+# Aplicação Framepack-Worker
+
+O projeto Framepack-Worker é responsável pelo processamento assíncrono de vídeos, extraindo frames e realizando outras operações de backend necessárias para o funcionamento do sistema.
+
+## Funcionalidades Principais
+
+- **Processamento de Vídeos**: Processa vídeos, extrai frames e retorna as imagens em um arquivo .zip.
+- **Fila de Processamento**: Utilização do Amazon SQS para gerenciar a fila de processamento dos vídeos.
+- **Armazenamento de Arquivos**: Utilização do Amazon S3 para armazenar os vídeos enviados e os arquivos .zip gerados.
+- **Extração de Frames de Vídeos**: Extrai frames dos vídeos baixados em intervalos específicos.
+
+## Estrutura do Projeto
+
+- **BuildingBlocks**: Contém serviços e utilitários comuns, como o serviço de integração com o S3.
+- **Controllers**: Contém os controladores responsáveis por lidar com as requisições HTTP.
+- **DevOps**: Contém scripts e configurações para Docker e Kubernetes.
+- **Gateways**: Contém os handlers responsáveis pelo processamento de vídeos.
+- **Infra**: Contém a infraestrutura necessária para o funcionamento do projeto, como configurações de banco de dados e serviços externos.
+- **UseCases**: Contém os casos de uso principais do worker.
+- **Worker**: Contém a lógica principal do worker para download de vídeos, extração de frames, compactação e upload.
+
+## Tecnologias Utilizadas
+
+- **.NET 8**: Framework principal para desenvolvimento do backend. <br>
+- **Docker**: Containerização da aplicação para garantir portabilidade e facilitar o deploy. <br>
+- **Kubernetes**: Orquestração dos container visando resiliência da aplicação <br>
+- **Banco de Dados**: Utilização do SQL Server para armazenamento de informações. <br>
+
+## Serviços Utilizados
+
+- **Amazon SQS**: Para gerenciar a fila de processamento dos vídeos.
+- **Amazon S3**: Para armazenar os vídeos enviados e os arquivos .zip gerados.
+- **Github Actions**: Todo o CI/CD é automatizado através de pipelines. <br>
+- **SonarQube**: Análise estática do código para promover qualidade. <br>
+
+---
+
+## Como Executar o Projeto (Framepack-WebApi)
 
 ### Clonar o repositório
   ```
@@ -93,7 +136,7 @@ Este microserviço tem como pricipal objetivo ser responsável pelo cadastro de 
 
 Para executar o projeto com Kubernetes, siga os passos abaixo:
 
-- **Crie um arquivo `.env`** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
+- **Crie um arquivo `.env`** no diretório raiz do projeto (`framepack-api-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
 
   ```plaintext
   AWS_ACCESS_KEY_ID=your_access_key_id
@@ -124,20 +167,18 @@ Para executar o projeto com Kubernetes, siga os passos abaixo:
 - **Aguarde até que os pods da API e do Worker estejam em execução**:
   ```sh
   kubectl get pods -l app=framepack-api
-  kubectl get pods -l app=framepack-worker
   ```
 
 - **Configure o port-forwarding** para os serviços da API e do Worker:
   ```sh
-  kubectl port-forward svc/framepack-api-service 8080:80
-  kubectl port-forward svc/framepack-worker-service 8081:80
+  kubectl port-forward svc/framepack-api-service 8080:80 8443:443
   ```
 
 ### Usando o Script PowerShell
 
 Se preferir, você pode executar o script PowerShell que automatiza todos os passos acima:
 
-- **Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-api-hackathon/`) e configure as variáveis de ambiente necessárias:
+- **Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-api-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
 
   ```plaintext
   AWS_ACCESS_KEY_ID=your_access_key_id
@@ -159,7 +200,99 @@ Este script irá:
 - Aguardar até que os pods da API e do Worker estejam em execução.
 - Configurar o port-forwarding para os serviços da API e do Worker.
 
-Certifique-se de ter o `kubectl` instalado e configurado corretamente em sua máquina antes de executar o script.
+---
+
+## Como Executar o Projeto (Framepack-Worker)
+
+### Clonar o repositório
+  ```
+  git clone https://github.com/SofArc6Soat/framepack-worker-hackathon.git
+  ```
+
+### Executar com docker-compose
+#### Docker (docker-compose)
+- **Navegue até o diretório do projeto:**
+  ```
+  cd framepack-worker-hackathon\src\DevOps
+  ```
+- **Configure o ambiente Docker:**
+  ```
+  docker-compose up --build
+  ```
+- **A aplicação estará disponível em:** http://localhost:5001
+- **URL do Swagger:** http://localhost:5001/swagger
+- **URL do Healthcheck da API:** http://localhost:5001/health
+
+### Executar com Kubernetes
+#### Kubernetes
+
+Para executar o projeto com Kubernetes, siga os passos abaixo:
+
+- **Crie um arquivo `.env`** no diretório (`framepack-worker-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
+
+  ```plaintext
+  AWS_ACCESS_KEY_ID=your_access_key_id
+  AWS_SECRET_ACCESS_KEY=your_secret_access_key
+  AWS_REGION=your_region
+  ```
+
+- **Navegue até o diretório do projeto**:
+  ```
+  cd framepack-worker-hackathon\src\DevOps\kubernetes
+  ```
+  
+- **Crie um Secret no Kubernetes** a partir do arquivo [.env]:
+  ```sh
+  kubectl create secret generic aws-secret --from-env-file=framepack-worker-hackathon/.env
+  ```
+
+- **Aplique os arquivos YAML** para configurar os recursos do Kubernetes:
+  ```sh
+  kubectl apply -f 01-framepack-worker-deployment.yaml
+  kubectl apply -f 02-framepack-worker-service.yaml
+  kubectl apply -f 03-framepack-worker-hpa.yaml
+  ```
+
+- **Aguarde até que os pods da API e do Worker estejam em execução**:
+  ```sh
+  kubectl get pods -l app=framepack-worker
+  ```
+
+- **Configure o port-forwarding** para os serviços da API e do Worker:
+  ```sh
+  kubectl port-forward svc/framepack-worker-service 8080:80
+  ```
+
+### Usando o Script PowerShell
+
+Se preferir, você pode executar o script PowerShell que automatiza todos os passos acima:
+
+- **Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-worker-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
+
+  ```plaintext
+  AWS_ACCESS_KEY_ID=your_access_key_id
+  AWS_SECRET_ACCESS_KEY=your_secret_access_key
+  AWS_REGION=your_region
+  ```
+- **Execute o script PowerShell** para criar o Secret e aplicar os recursos do Kubernetes:
+
+  ```powershell
+  Get-ExecutionPolicy
+  Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+  .\delete-k8s-resources.ps1
+  .\apply-k8s-resources.ps1
+  ```
+Este script irá:
+
+- Criar um Secret no Kubernetes a partir do arquivo [.env].
+- Aplicar todos os arquivos YAML necessários para configurar os recursos do Kubernetes.
+- Aguardar até que os pods da API e do Worker estejam em execução.
+- Configurar o port-forwarding para os serviços da API e do Worker.
+
+
+**Certifique-se de ter o `kubectl` instalado e configurado corretamente em sua máquina antes de executar o script.**
+
+---
 
 ## Desenho da arquitetura
 Para visualizar o desenho da arquitetura abra o arquivo "Arquitetura-Infra.drawio.png" e "Arquitetura-Macro.drawio.png" no diretório "arquitetura" ou importe o arquivo "Arquitetura.drawio" no Draw.io (https://app.diagrams.net/).
