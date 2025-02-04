@@ -75,6 +75,24 @@ public class UsuarioUseCaseTests
     }
 
     [Fact]
+    public async Task IdentificarUsuarioAsync_DeveNotificar_QuandoTokenForNulo()
+    {
+        // Arrange
+        var email = "email@teste.com";
+        var senha = "senha123";
+        var cancellationToken = CancellationToken.None;
+
+        _cognitoGatewayMock.Setup(x => x.IdentifiqueSeAsync(email, senha, cancellationToken)).ReturnsAsync((TokenUsuario?)null);
+
+        // Act
+        var result = await _usuarioUseCase.IdentificarUsuarioAsync(email, senha, cancellationToken);
+
+        // Assert
+        Assert.Null(result);
+        _notificadorMock.Verify(x => x.Handle(It.Is<Notificacao>(n => n.Mensagem == "Email ou senha inválidos.")), Times.Once);
+    }
+
+    [Fact]
     public async Task ConfirmarEmailVerificacaoAsync_DeveRetornarFalse_QuandoValidacaoFalhar()
     {
         // Arrange
@@ -88,6 +106,7 @@ public class UsuarioUseCaseTests
 
         // Assert
         Assert.False(result);
+        _cognitoGatewayMock.Verify(x => x.ConfirmarEmailVerificacaoAsync(emailVerificacao, cancellationToken), Times.Never);
     }
 
     [Fact]
@@ -137,4 +156,7 @@ public class UsuarioUseCaseTests
         // Assert
         Assert.False(result);
     }
+
+
+
 }
