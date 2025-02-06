@@ -173,4 +173,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push Docker Image
-        run: docker buildx build --push -t sofarc6soat/framepack-api:latest -f ./src/Api/Dockerfile ..
+        run: docker buildx build --push -t sofarc6soat/framepack-api:latest -f ./src/Api/Dockerfile ./src
