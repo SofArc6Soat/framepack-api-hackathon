@@ -14,6 +14,12 @@ namespace Gateways.Dtos.Events
 
     public record DownloadEfetuadoEvent : Event
     {
-        public string UrlArquivoVideo { get; set; } = string.Empty;
+        private string _urlArquivoVideo = string.Empty;
+
+        public string UrlArquivoVideo
+        {
+            get => _urlArquivoVideo;
+            set => _urlArquivoVideo = value ?? throw new ArgumentNullException(nameof(UrlArquivoVideo));
+        }
     }
 }
