@@ -26,17 +26,14 @@ namespace Framepack_WebApi.Tests.Core.UseCases
         }
 
         [Fact]
-        public async Task EfetuarUploadAsync_DeveRetornarFalse_QuandoConversaoForNula()
-        {
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _conversaoUseCase.EfetuarUploadAsync(null, CancellationToken.None));
-        }
+        public async Task EfetuarUploadAsync_DeveRetornarFalse_QuandoConversaoForNula() => await Assert.ThrowsAsync<ArgumentNullException>(() => _conversaoUseCase.EfetuarUploadAsync(null, CancellationToken.None));
 
         [Fact]
         public async Task EfetuarUploadAsync_DeveRetornarFalse_QuandoEmailUsuarioNaoForEncontrado()
         {
             var conversao = new Conversao(Guid.NewGuid(), "usuarioId", DateTime.Now, Status.AguardandoConversao, "nomeArquivo", "urlArquivoVideo", "urlArquivoCompactado");
             _cognitoGatewayMock.Setup(x => x.ObertUsuarioCognitoPorIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new AdminGetUserResponse { UserAttributes = new List<AttributeType>() });
+                .ReturnsAsync(new AdminGetUserResponse { UserAttributes = [] });
 
             var result = await _conversaoUseCase.EfetuarUploadAsync(conversao, CancellationToken.None);
 
@@ -48,7 +45,7 @@ namespace Framepack_WebApi.Tests.Core.UseCases
         public async Task EfetuarUploadAsync_DeveRetornarTrue_QuandoUploadForBemSucedido()
         {
             var conversao = new Conversao(Guid.NewGuid(), "usuarioId", DateTime.Now, Status.AguardandoConversao, "nomeArquivo", "urlArquivoVideo", "urlArquivoCompactado");
-            var userAttributes = new List<AttributeType> { new AttributeType { Name = "email", Value = "email@teste.com" } };
+            var userAttributes = new List<AttributeType> { new() { Name = "email", Value = "email@teste.com" } };
             _cognitoGatewayMock.Setup(x => x.ObertUsuarioCognitoPorIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AdminGetUserResponse { UserAttributes = userAttributes });
             _conversaoGatewayMock.Setup(x => x.EfetuarUploadAsync(It.IsAny<Conversao>(), It.IsAny<CancellationToken>()))
@@ -63,7 +60,7 @@ namespace Framepack_WebApi.Tests.Core.UseCases
         public async Task EfetuarUploadAsync_DeveRetornarFalse_QuandoUploadFalhar()
         {
             var conversao = new Conversao(Guid.NewGuid(), "usuarioId", DateTime.Now, Status.AguardandoConversao, "nomeArquivo", "urlArquivoVideo", "urlArquivoCompactado");
-            var userAttributes = new List<AttributeType> { new AttributeType { Name = "email", Value = "email@teste.com" } };
+            var userAttributes = new List<AttributeType> { new() { Name = "email", Value = "email@teste.com" } };
             _cognitoGatewayMock.Setup(x => x.ObertUsuarioCognitoPorIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AdminGetUserResponse { UserAttributes = userAttributes });
             _conversaoGatewayMock.Setup(x => x.EfetuarUploadAsync(It.IsAny<Conversao>(), It.IsAny<CancellationToken>()))
@@ -78,7 +75,7 @@ namespace Framepack_WebApi.Tests.Core.UseCases
         [Fact]
         public async Task ObterConversoesPorUsuarioAsync_DeveRetornarListaDeConversoes()
         {
-            var conversoes = new List<Conversao> { new Conversao(Guid.NewGuid(), "usuarioId", DateTime.Now, Status.AguardandoConversao, "nomeArquivo", "urlArquivoVideo", "urlArquivoCompactado") };
+            var conversoes = new List<Conversao> { new(Guid.NewGuid(), "usuarioId", DateTime.Now, Status.AguardandoConversao, "nomeArquivo", "urlArquivoVideo", "urlArquivoCompactado") };
             _conversaoGatewayMock.Setup(x => x.ObterConversoesPorUsuarioAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(conversoes);
 
