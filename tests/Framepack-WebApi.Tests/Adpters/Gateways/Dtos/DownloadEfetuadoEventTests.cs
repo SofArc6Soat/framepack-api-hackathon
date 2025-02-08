@@ -31,12 +31,10 @@ public class DownloadEfetuadoEventTests
     }
 
     [Fact]
-    public void DownloadEfetuadoEvent_ShouldThrowException_WhenUrlArquivoVideoIsNull()
-    {
+    public void DownloadEfetuadoEvent_ShouldThrowException_WhenUrlArquivoVideoIsNull() =>
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new DownloadEfetuadoEvent
         {
             UrlArquivoVideo = null
         });
-    }
 }
