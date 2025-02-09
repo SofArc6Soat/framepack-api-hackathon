@@ -1,325 +1,152 @@
-- [Aplicação Framepack-WebApi (backend)](#aplicação-framepack-webapi)
-  - [Funcionalidades Principais](#funcionalidades-principais)
-  - [Estrutura do Projeto](#estrutura-do-projeto)
-  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
-  - [Serviços Utilizados](#serviços-utilizados)
-- [Aplicação Framepack-Worker](#aplicação-framepack-worker)
-  - [Funcionalidades Principais](#funcionalidades-principais-1)
-  - [Estrutura do Projeto](#estrutura-do-projeto-1)
-  - [Tecnologias Utilizadas](#tecnologias-utilizadas-1)
-  - [Serviços Utilizados](#serviços-utilizados-1)
-  - [Como Executar o Projeto](#como-executar-o-projeto)
-    - [Clonar o repositório](#clonar-o-repositório)
-    - [Executar com docker-compose](#executar-com-docker-compose)
+- [📌 Aplicação Framepack-WebApi (API)](#-aplicação-framepack-webapi-api)
+  - [📖 Visão Geral](#-visão-geral)
+    - [Fluxo de Processamento](#fluxo-de-processamento)
+  - [🚀 Funcionalidades Principais](#-funcionalidades-principais)
+      - [Upload de Vídeos](#upload-de-vídeos)
+      - [Geração de Evento](#geração-de-evento)
+      - [Download de Vídeos](#download-de-vídeos)
+      - [Consultas de Status](#consultas-de-status)
+      - [Gestão de Acessos](#gestão-de-acessos)
+  - [📁 Estrutura do Projeto](#-estrutura-do-projeto)
+  - [🛠 Tecnologias Utilizadas](#-tecnologias-utilizadas)
+  - [▶️ Como Executar o Projeto (Framepack-WebApi)](#️-como-executar-o-projeto-framepack-webapi)
+    - [Clonar o Repositório](#clonar-o-repositório)
+    - [Executar com Docker Compose](#executar-com-docker-compose)
+      - [🐳 Docker (docker-compose)](#-docker-docker-compose)
     - [Executar com Kubernetes](#executar-com-kubernetes)
-  - [Desenho da arquitetura](#desenho-da-arquitetura)
-  - [Demonstração em vídeo](#demonstração-em-vídeo)
-  - [Relatório de Cobertura](#relatório-de-cobertura)
-  - [Autores](#autores)
-  - [Documentação Adicional](#documentação-adicional)
-  - [Repositórios microserviços](#repositórios-microserviços)
-  - [Repositórios diversos](#repositórios-diversos)
-
+      - [☸️ Kubernetes](#️-kubernetes)
+  - [📚 Documentações](#-documentações)
+  - [👨‍💻 Autores](#-autores)
+  - [🔗 Repositórios de Microserviços](#-repositórios-de-microserviços)
 
 ---
 
-# Aplicação Framepack-WebApi (backend)
+# 📌 Aplicação Framepack-WebApi (API)
 
-Este projeto visa o desenvolvimento do backend para um software de processamento de imagens. O software processa um vídeo, extrai os frames e retorna as imagens em um arquivo .zip.<br>
-Utilizando a arquitetura limpa, .NET 8, SQL Server, Cognito, Amazon SQS, Docker e Kubernetes, o objetivo é criar uma base sólida e escalável para suportar as funcionalidades necessárias para um sistema de conversão de videos em frames. <br>
-O foco principal é a criação de uma aplicação robusta, modular e de fácil manutenção.<br>
-Este microserviço tem como pricipal objetivo ser responsável pelo cadastro de clientes, funcionários e produtos.<br>
+## 📖 Visão Geral
+O Framepack-WebApi é uma API responsável pelo gerenciamento do fluxo de processamento de vídeos. Ela permite que usuários façam o upload de arquivos .MP4 para o Amazon S3 e gera eventos no Amazon SQS para que o serviço Framepack-Worker processe os vídeos.
 
-## Funcionalidades Principais
+A API também possibilita a consulta de uploads, visualização do status do processamento e download dos arquivos processados. Além disso, fornece funcionalidades de gestão de acessos, incluindo cadastro de usuários, login, redefinição de senha e confirmação de cadastro.
 
-- **Processamento de Vídeos**: Processa vídeos, extrai frames e retorna as imagens em um arquivo .zip.
-- **Gerenciamento de Usuários**: Gestão de usuários (funcionários ou clientes) integrados com o Cognito, permitindo o cadastro, confirmação do e-mail e recuperação de senha.
-- **Armazenamento de Dados**: Persistência de dados utilizando um banco de dados SQL Server.
-- **Fila de Processamento**: Utilização do Amazon SQS para gerenciar a fila de processamento dos vídeos.
-- **Armazenamento de Arquivos**: Utilização do Amazon S3 para armazenar os vídeos enviados e os arquivos .zip gerados.
-- **Notificações por Email**: Envio de emails de notificação aos usuários sobre o status do processamento utilizando Amazon SES.
-- **Containerização e Orquestração**: Utilização de Docker para containerização e Kubernetes para orquestração dos containers, garantindo portabilidade e resiliência da aplicação.
-- **CI/CD Automatizado**: Automação de todo o CI/CD através de pipelines utilizando Github Actions.
-- **Análise de Código**: Análise estática do código para promover qualidade utilizando SonarQube.
-
-## Estrutura do Projeto
-
-- **Api**: Contém a API principal do projeto.
-- **BuildingBlocks**: Contém serviços e utilitários comuns, como o serviço de integração com o S3.
-- **Controllers**: Contém os controladores responsáveis por lidar com as requisições HTTP.
-- **DevOps**: Contém scripts e configurações para Docker e Kubernetes.
-- **Domain**: Contém as entidades e regras de negócio do domínio.
-- **Gateways**: Contém os handlers responsáveis pelo processamento de vídeos.
-- **Gateways.Cognito**: Contém a integração com o Amazon Cognito para autenticação e autorização.
-- **Infra**: Contém a infraestrutura necessária para o funcionamento do projeto, como configurações de banco de dados e serviços externos.
-- **UseCases**: Contém os casos de uso principais do worker.
-
-## Tecnologias Utilizadas
-
-- **.NET 8**: Framework principal para desenvolvimento do backend. <br>
-- **Arquitetura Limpa**: Estruturação do projeto para promover a separação de preocupações e facilitar a manutenção e escalabilidade. <br>
-- **Docker**: Containerização da aplicação para garantir portabilidade e facilitar o deploy. <br>
-- **Kubernetes**: Orquestração dos container visando resiliência da aplicação <br>
-- **Banco de Dados**: Utilização do SQL Server para armazenamento de informações. <br>
-
-## Serviços Utilizados
-
-- **Amazon SQS**: Para gerenciar a fila de processamento dos vídeos.
-- **Amazon S3**: Para armazenar os vídeos enviados e os arquivos .zip gerados.
-- **Amazon Cognito**: Para autenticação e autorização dos usuários.
-- **Amazon SES**: Para envio de emails de notificação aos usuários sobre o status do processamento.
-- **Github Actions**: Todo o CI/CD é automatizado através de pipelines. <br>
-- **SonarQube**: Análise estática do código para promover qualidade. <br>
+### Fluxo de Processamento
+1️⃣ O usuário faz upload de um vídeo na Framepack-WebApi.
+2️⃣ O vídeo é armazenado no Amazon S3 e um evento é enviado ao Amazon SQS.
+3️⃣ O Framepack-Worker processa o vídeo (download, extração de frames, compactação e upload do arquivo final no S3).
+4️⃣ O usuário pode consultar o status do processamento e realizar o download do arquivo final.
+5️⃣ O sistema notifica o usuário por e-mail sobre o status da operação.
 
 ---
 
-# Aplicação Framepack-Worker
+## 🚀 Funcionalidades Principais
 
-O projeto Framepack-Worker é responsável pelo processamento assíncrono de vídeos, extraindo frames e realizando outras operações de backend necessárias para o funcionamento do sistema.
+#### Upload de Vídeos
+O usuário pode enviar vídeos para o Amazon S3 via API.
 
-## Funcionalidades Principais
+#### Geração de Evento
+Após o upload, a API gera um evento no Amazon SQS, permitindo que o Framepack-Worker inicie o processamento do vídeo.
 
-- **Processamento de Vídeos**: Processa vídeos, extrai frames e retorna as imagens em um arquivo .zip.
-- **Fila de Processamento**: Utilização do Amazon SQS para gerenciar a fila de processamento dos vídeos.
-- **Armazenamento de Arquivos**: Utilização do Amazon S3 para armazenar os vídeos enviados e os arquivos .zip gerados.
-- **Extração de Frames de Vídeos**: Extrai frames dos vídeos baixados em intervalos específicos.
+#### Download de Vídeos
+Permite o download dos vídeos processados, recuperando a URL armazenada no Amazon DynamoDB.
 
-## Estrutura do Projeto
+#### Consultas de Status
+Os usuários podem visualizar a lista de uploads realizados e o status do processamento.
 
-- **BuildingBlocks**: Contém serviços e utilitários comuns, como o serviço de integração com o S3.
-- **Controllers**: Contém os controladores responsáveis por lidar com as requisições HTTP.
-- **DevOps**: Contém scripts e configurações para Docker e Kubernetes.
-- **Gateways**: Contém os handlers responsáveis pelo processamento de vídeos.
-- **Infra**: Contém a infraestrutura necessária para o funcionamento do projeto, como configurações de banco de dados e serviços externos.
-- **UseCases**: Contém os casos de uso principais do worker.
-- **Worker**: Contém a lógica principal do worker para download de vídeos, extração de frames, compactação e upload.
-
-## Tecnologias Utilizadas
-
-- **.NET 8**: Framework principal para desenvolvimento do backend. <br>
-- **Docker**: Containerização da aplicação para garantir portabilidade e facilitar o deploy. <br>
-- **Kubernetes**: Orquestração dos container visando resiliência da aplicação <br>
-- **Banco de Dados**: Utilização do SQL Server para armazenamento de informações. <br>
-
-## Serviços Utilizados
-
-- **Amazon SQS**: Para gerenciar a fila de processamento dos vídeos.
-- **Amazon S3**: Para armazenar os vídeos enviados e os arquivos .zip gerados.
-- **Github Actions**: Todo o CI/CD é automatizado através de pipelines. <br>
-- **SonarQube**: Análise estática do código para promover qualidade. <br>
+#### Gestão de Acessos
+Gerenciamento de usuários, incluindo cadastro, login, redefinição de senha e confirmação de cadastro, utilizando o Amazon Cognito para autenticação e autorização.
 
 ---
 
-## Como Executar o Projeto (Framepack-WebApi)
+## 📁 Estrutura do Projeto
 
-### Clonar o repositório
-  ```
-  git clone https://github.com/SofArc6Soat/framepack-api-hackathon.git
-  ```
+A arquitetura do Framepack-WebApi segue uma abordagem modular e escalável, facilitando a manutenção e a evolução da aplicação.
 
-### Executar com docker-compose
-#### Docker (docker-compose)
-- **Navegue até o diretório do projeto:**
-  ```
-  cd framepack-api-hackathon\src\DevOps
-  ```
-- **Configure o ambiente Docker:**
-  ```
-  docker-compose up --build
-  ```
-- **A aplicação estará disponível em:** http://localhost:5001
-- **URL do Swagger:** http://localhost:5001/swagger
-- **URL do Healthcheck da API:** http://localhost:5001/health
+- **🛠 BuildingBlocks** → Serviços e utilitários comuns (ex.: integração com Amazon S3, SQS).
+- **📡 Controllers** → Controladores responsáveis pelo gerenciamento de requisições HTTP.
+- **⚙️ DevOps** → Scripts e configurações para Docker e Kubernetes.
+- **🎬 Gateways** → Handlers especializados na comunicação entre APIs e serviços.
+- **🏗 Infra** → Configurações de banco de dados, serviços externos e infraestrutura necessária.
+- **📌 UseCases** → Implementação dos principais casos de uso da API.
+- **🖥 WebApi** → Contém a API principal do projeto.
+
+---
+
+## 🛠 Tecnologias Utilizadas
+
+- **.NET 8** → Framework principal para desenvolvimento do backend.
+- **Docker** → Containerização da aplicação, garantindo portabilidade e facilidade de deploy.
+- **Kubernetes** → Orquestração de containers para resiliência e escalabilidade.
+- **Amazon DynamoDB** → Banco de dados NoSQL para armazenamento de metadados.
+- **Amazon SQS** → Serviço de mensageria para eventos assíncronos.
+- **Amazon S3** → Armazenamento eficiente para vídeos e arquivos processados.
+- **Amazon Cognito** → Gerenciamento de autenticação e autorização dos usuários.
+- **CI/CD Automatizado** → Pipeline de integração e entrega contínua via GitHub Actions.
+- **Análise de Código** → Qualidade do código garantida por SonarQube.
+
+---
+
+## ▶️ Como Executar o Projeto (Framepack-WebApi)
+
+### Clonar o Repositório
+```sh
+git clone https://github.com/SofArc6Soat/framepack-api-hackathon.git
+```
+
+---
+
+### Executar com Docker Compose
+#### 🐳 Docker (docker-compose)
+1️⃣ **Navegue até o diretório do projeto:**
+```sh
+cd framepack-api-hackathon/src/DevOps
+```
+2️⃣ **Configure o ambiente Docker:**
+```sh
+docker-compose up --build
+```
+3️⃣ **Acesse a aplicação:**
+- API disponível em: `http://localhost:5001`
+- Swagger: `http://localhost:5001/swagger`
+- Healthcheck: `http://localhost:5001/health`
+
+---
 
 ### Executar com Kubernetes
-#### Kubernetes
-
-Para executar o projeto com Kubernetes, siga os passos abaixo:
-
-- **Crie um arquivo `.env`** no diretório raiz do projeto (`framepack-api-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
-
-  ```plaintext
-  AWS_ACCESS_KEY_ID=your_access_key_id
-  AWS_SECRET_ACCESS_KEY=your_secret_access_key
-  AWS_REGION=your_region
-  ```
-
-- **Navegue até o diretório do projeto**:
-  ```
-  cd framepack-api-hackathon\src\DevOps\kubernetes
-  ```
-  
-- **Crie um Secret no Kubernetes** a partir do arquivo [.env]:
-  ```sh
-  kubectl create secret generic aws-secret --from-env-file=framepack-api-hackathon/.env
-  ```
-
-- **Aplique os arquivos YAML** para configurar os recursos do Kubernetes:
-  ```sh
-  kubectl apply -f 01-dynamodb-local-deployment.yaml
-  kubectl apply -f 02-dynamodb-local-service.yaml
-  kubectl apply -f 03-dynamodb-local-setup-deployment.yaml
-  kubectl apply -f 04-framepack-api-deployment.yaml
-  kubectl apply -f 05-framepack-api-service.yaml
-  kubectl apply -f 06-framepack-api-hpa.yaml
-  ```
-
-- **Aguarde até que os pods da API e do Worker estejam em execução**:
-  ```sh
-  kubectl get pods -l app=framepack-api
-  ```
-
-- **Configure o port-forwarding** para os serviços da API e do Worker:
-  ```sh
-  kubectl port-forward svc/framepack-api-service 8080:80 8443:443
-  ```
-
-### Usando o Script PowerShell
-
-Se preferir, você pode executar o script PowerShell que automatiza todos os passos acima:
-
-- **Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-api-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
-
-  ```plaintext
-  AWS_ACCESS_KEY_ID=your_access_key_id
-  AWS_SECRET_ACCESS_KEY=your_secret_access_key
-  AWS_REGION=your_region
-  ```
-- **Execute o script PowerShell** para criar o Secret e aplicar os recursos do Kubernetes:
-
-  ```powershell
-  Get-ExecutionPolicy
-  Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
-  .\delete-k8s-resources.ps1
-  .\apply-k8s-resources.ps1
-  ```
-Este script irá:
-
-- Criar um Secret no Kubernetes a partir do arquivo [.env].
-- Aplicar todos os arquivos YAML necessários para configurar os recursos do Kubernetes.
-- Aguardar até que os pods da API e do Worker estejam em execução.
-- Configurar o port-forwarding para os serviços da API e do Worker.
+#### ☸️ Kubernetes
+1️⃣ **Crie um arquivo `.env`** e configure as variáveis:
+```plaintext
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+AWS_REGION=your_region
+```
+2️⃣ **Aplique os arquivos YAML:**
+```sh
+kubectl apply -f 04-framepack-api-deployment.yaml
+kubectl apply -f 05-framepack-api-service.yaml
+kubectl apply -f 06-framepack-api-hpa.yaml
+```
+3️⃣ **Configure o port-forwarding para acessar a API:**
+```sh
+kubectl port-forward svc/framepack-api-service 8080:80 8443:443
+```
 
 ---
 
-## Como Executar o Projeto (Framepack-Worker)
+## 📚 Documentações
+Para acessar arquitetura, Domain Storytelling, Context Map, Linguagem Ubíqua, Event Storming e vídeos de demonstração, consulte o repositório de documentação:
 
-### Clonar o repositório
-  ```
-  git clone https://github.com/SofArc6Soat/framepack-worker-hackathon.git
-  ```
-
-### Executar com docker-compose
-#### Docker (docker-compose)
-- **Navegue até o diretório do projeto:**
-  ```
-  cd framepack-worker-hackathon\src\DevOps
-  ```
-- **Configure o ambiente Docker:**
-  ```
-  docker-compose up --build
-  ```
-- **A aplicação estará disponível em:** http://localhost:5001
-- **URL do Swagger:** http://localhost:5001/swagger
-- **URL do Healthcheck da API:** http://localhost:5001/health
-
-### Executar com Kubernetes
-#### Kubernetes
-
-Para executar o projeto com Kubernetes, siga os passos abaixo:
-
-- **Crie um arquivo `.env`** no diretório (`framepack-worker-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
-
-  ```plaintext
-  AWS_ACCESS_KEY_ID=your_access_key_id
-  AWS_SECRET_ACCESS_KEY=your_secret_access_key
-  AWS_REGION=your_region
-  ```
-
-- **Navegue até o diretório do projeto**:
-  ```
-  cd framepack-worker-hackathon\src\DevOps\kubernetes
-  ```
-  
-- **Crie um Secret no Kubernetes** a partir do arquivo [.env]:
-  ```sh
-  kubectl create secret generic aws-secret --from-env-file=framepack-worker-hackathon/.env
-  ```
-
-- **Aplique os arquivos YAML** para configurar os recursos do Kubernetes:
-  ```sh
-  kubectl apply -f 01-framepack-worker-deployment.yaml
-  kubectl apply -f 02-framepack-worker-service.yaml
-  kubectl apply -f 03-framepack-worker-hpa.yaml
-  ```
-
-- **Aguarde até que os pods da API e do Worker estejam em execução**:
-  ```sh
-  kubectl get pods -l app=framepack-worker
-  ```
-
-- **Configure o port-forwarding** para os serviços da API e do Worker:
-  ```sh
-  kubectl port-forward svc/framepack-worker-service 8080:80
-  ```
-
-### Usando o Script PowerShell
-
-Se preferir, você pode executar o script PowerShell que automatiza todos os passos acima:
-
-- **Crie um arquivo [.env]** no diretório raiz do projeto (`framepack-worker-hackathon/src/DevOps/kubernetes/`) e configure as variáveis de ambiente necessárias:
-
-  ```plaintext
-  AWS_ACCESS_KEY_ID=your_access_key_id
-  AWS_SECRET_ACCESS_KEY=your_secret_access_key
-  AWS_REGION=your_region
-  ```
-- **Execute o script PowerShell** para criar o Secret e aplicar os recursos do Kubernetes:
-
-  ```powershell
-  Get-ExecutionPolicy
-  Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
-  .\delete-k8s-resources.ps1
-  .\apply-k8s-resources.ps1
-  ```
-Este script irá:
-
-- Criar um Secret no Kubernetes a partir do arquivo [.env].
-- Aplicar todos os arquivos YAML necessários para configurar os recursos do Kubernetes.
-- Aguardar até que os pods da API e do Worker estejam em execução.
-- Configurar o port-forwarding para os serviços da API e do Worker.
-
-
-**Certifique-se de ter o `kubectl` instalado e configurado corretamente em sua máquina antes de executar o script.**
+🔗 **[Framepack-Doc-Hackathon](https://github.com/SofArc6Soat/framepack-doc-hackathon)**
 
 ---
 
-## Desenho da arquitetura
-Para visualizar o desenho da arquitetura abra o arquivo "Arquitetura-Infra.drawio.png" e "Arquitetura-Macro.drawio.png" no diretório "arquitetura" ou importe o arquivo "Arquitetura.drawio" no Draw.io (https://app.diagrams.net/).
+## 👨‍💻 Autores
 
-## Demonstração em vídeo
-Para visualizar a demonstração da aplicação da Fase Hackathon:
-- Atualizações efetuadas na arquitetura e funcionamento da aplicação - Link do Vimeo: 
-- Processo de deploy e execução das pipelines - Link do Vimeo: 
+- **Anderson Lopez de Andrade** - RM: 350452
+- **Henrique Alonso Vicente** - RM: 354583
 
-## Autores
+---
 
-- **Anderson Lopez de Andrade RM: 350452** <br>
-- **Henrique Alonso Vicente RM: 354583**<br>
+## 🔗 Repositórios de Microserviços
 
-## Documentação Adicional
-
-- **Miro - Domain Storytelling, Context Map, Linguagem Ubíqua e Event Storming**: [Link para o Event Storming](https://miro.com/app/board/uXjVKST91sw=/)
-- **Github - Domain Storytelling**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-domain-story-telling)
-- **Github - Context Map**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-ubiquitous-language)
-- **Github - Linguagem Ubíqua**: [Link para o Domain Storytelling](https://github.com/SofArc6Soat/quickfood-ubiquitous-language)
-
-## Repositórios microserviços
-
-- **Framepack-WebApi**: [Link](https://github.com/SofArc6Soat/framepack-api-hackathon)
-- **Framepack-Worker**: [Link](https://github.com/SofArc6Soat/framepack-worker-hackathon)
-
-## Repositórios diversos
-
-- **Documentação**: [Link](https://github.com/SofArc6Soat/framepack-api)
-- **Lambda Autenticação**: [Link](https://github.com/SofArc6Soat/quickfood-auth-function)
+- **Framepack-WebApi** → [🔗 GitHub](https://github.com/SofArc6Soat/framepack-api-hackathon)
+- **Framepack-Worker** → [🔗 GitHub](https://github.com/SofArc6Soat/framepack-worker-hackathon)
+- **Documentações** → [🔗 GitHub](https://github.com/SofArc6Soat/framepack-doc-hackathon)
